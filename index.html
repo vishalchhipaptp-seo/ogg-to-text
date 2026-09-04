@@ -340,7 +340,7 @@
       <div class="drop-meta">
         <span class="chip">.ogg</span>
         <span class="chip">.oga</span>
-        <span class="chip">any size</span>
+        <span class="chip">up to 25 MB</span>
       </div>
     </div>
     <input type="file" id="fileInput" accept=".ogg,.oga,audio/ogg,audio/*" />
@@ -503,12 +503,11 @@
 
   // Handle file
   async function handleFile(file) {
-    // No hard size limit — Whisper handles chunking internally.
-    // Warn only for very large files where processing will take a while.
-    if (file.size > 200 * 1024 * 1024) {
-      showErr('File is very large (over 200 MB). Try splitting it into shorter segments for best results.');
+    if (file.size > 25 * 1024 * 1024) {
+      showErr('File exceeds 25 MB. Please use a smaller file.');
       return;
     }
+    // No minimum size — even a few seconds of audio works fine.
     curName = file.name.replace(/\.[^.]+$/, '');
 
     try {
