@@ -24,8 +24,8 @@
       --err-dim:   #FFF0F0;
       --wave:      #5834D9;
       --mono-bg:   #F4F1FF;
+      --disabled:  #C4BAE8;
     }
-
     @media (prefers-color-scheme: dark) {
       :root:not([data-theme="light"]) {
         --bg:        #100D1E;
@@ -42,6 +42,7 @@
         --err-dim:   #2A0D10;
         --wave:      #9D82F7;
         --mono-bg:   #16122A;
+        --disabled:  #3D3060;
       }
     }
     :root[data-theme="dark"] {
@@ -59,10 +60,10 @@
       --err-dim:   #2A0D10;
       --wave:      #9D82F7;
       --mono-bg:   #16122A;
+      --disabled:  #3D3060;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: var(--bg);
       color: var(--text);
@@ -79,7 +80,7 @@
       position: sticky; top: 0; z-index: 40;
     }
     .header-inner {
-      max-width: 680px; margin: 0 auto;
+      max-width: 720px; margin: 0 auto;
       padding: 14px 24px;
       display: flex; align-items: center; justify-content: space-between;
     }
@@ -89,11 +90,9 @@
       font-size: 17px; color: var(--text); text-decoration: none;
     }
     .logo-mark {
-      width: 32px; height: 32px;
-      background: var(--accent);
+      width: 32px; height: 32px; background: var(--accent);
       border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     }
     .logo-mark svg { width: 16px; height: 16px; fill: #fff; }
     .badge-private {
@@ -102,67 +101,68 @@
     }
     .badge-private svg { width: 13px; height: 13px; stroke: var(--success); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-    /* ── Main ── */
+    /* ── Main layout ── */
     main {
-      max-width: 680px; margin: 0 auto;
-      padding: 48px 24px 64px;
+      max-width: 720px; margin: 0 auto;
+      padding: 40px 24px 64px;
     }
 
     /* ── Hero ── */
-    .hero { margin-bottom: 36px; }
+    .hero { margin-bottom: 28px; }
     .eyebrow {
       font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
       color: var(--accent); font-weight: 600; margin-bottom: 10px;
     }
     h1 {
       font-family: 'Syne', sans-serif; font-weight: 800;
-      font-size: clamp(28px, 5vw, 40px);
+      font-size: clamp(26px, 4.5vw, 38px);
       line-height: 1.12; letter-spacing: -.02em;
-      color: var(--text); text-wrap: balance; margin-bottom: 12px;
+      color: var(--text); text-wrap: balance; margin-bottom: 10px;
     }
-    .sub {
-      color: var(--text-2); font-size: 15px;
-      max-width: 480px; line-height: 1.65;
-    }
+    .sub { color: var(--text-2); font-size: 14px; max-width: 500px; line-height: 1.65; }
     .sub strong { color: var(--text); font-weight: 500; }
 
-    /* ── Card ── */
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px; overflow: hidden;
+    /* ── Two-column layout ── */
+    .tool-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 600px) {
+      .tool-layout { grid-template-columns: 1fr; }
     }
 
-    /* ── Drop zone ── */
+    /* ── Upload card ── */
+    .upload-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    /* Drop zone */
     .drop-zone {
-      padding: 48px 32px;
-      border-bottom: 1px solid var(--border);
-      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      padding: 36px 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
       cursor: pointer;
       transition: background 0.18s;
+      border-bottom: 1px solid var(--border);
     }
     .drop-zone:hover, .drop-zone.over { background: var(--accent-dim); }
     .drop-zone.over { outline: 2px solid var(--accent); outline-offset: -2px; }
-
     .drop-icon {
-      width: 56px; height: 56px; border-radius: 14px;
+      width: 52px; height: 52px; border-radius: 14px;
       background: var(--accent-dim);
       display: flex; align-items: center; justify-content: center;
       transition: transform 0.18s;
     }
-    .drop-zone:hover .drop-icon,
-    .drop-zone.over .drop-icon { transform: translateY(-3px); }
-    .drop-icon svg {
-      width: 26px; height: 26px; stroke: var(--accent); fill: none;
-      stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
-    }
+    .drop-zone:hover .drop-icon, .drop-zone.over .drop-icon { transform: translateY(-3px); }
+    .drop-icon svg { width: 24px; height: 24px; stroke: var(--accent); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
     .drop-label { text-align: center; }
-    .drop-label strong {
-      display: block; font-family: 'Syne', sans-serif; font-weight: 700;
-      font-size: 17px; color: var(--text); margin-bottom: 4px;
-    }
+    .drop-label strong { display: block; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; color: var(--text); margin-bottom: 3px; }
     .drop-label span { font-size: 13px; color: var(--text-2); }
-    .drop-meta { display: flex; gap: 8px; }
+    .drop-meta { display: flex; gap: 6px; }
     .chip {
       font-size: 11px; font-family: 'DM Mono', monospace;
       color: var(--text-3); background: var(--accent-dim);
@@ -170,94 +170,157 @@
     }
     input[type="file"] { display: none; }
 
-    /* ── States ── */
-    .state { padding: 24px 28px; display: none; }
-    .state.visible { display: block; }
+    /* Progress states inside upload card */
+    .upload-status { padding: 18px 20px; }
 
-    /* Spinner */
+    .loader-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
     .spin {
-      width: 26px; height: 26px; border-radius: 50%;
+      width: 24px; height: 24px; border-radius: 50%;
       border: 2.5px solid var(--border); border-top-color: var(--accent);
       animation: spin 0.75s linear infinite;
-      flex-shrink: 0; margin-top: 2px;
+      flex-shrink: 0; margin-top: 1px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .loader-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
-    .loader-text strong { display: block; font-size: 14px; font-weight: 500; margin-bottom: 3px; color: var(--text); }
+    .loader-text strong { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
     .loader-text span { font-size: 12px; color: var(--text-2); }
-    .track { background: var(--accent-dim); border-radius: 100px; height: 3px; overflow: hidden; margin-top: 4px; }
+    .track { background: var(--accent-dim); border-radius: 100px; height: 3px; overflow: hidden; }
     .fill { height: 100%; border-radius: 100px; background: var(--accent); width: 0; transition: width 0.35s ease; }
-    .track-note { font-size: 11px; color: var(--text-3); margin-top: 8px; }
+    .track-note { font-size: 11px; color: var(--text-3); margin-top: 7px; }
 
-    /* Wave bars */
-    .wave-row { display: flex; align-items: flex-end; gap: 4px; height: 28px; flex-shrink: 0; }
+    .wave-row { display: flex; align-items: flex-end; gap: 3px; height: 24px; flex-shrink: 0; }
     .wv { width: 3px; background: var(--wave); border-radius: 2px; animation: wv 1s ease-in-out infinite; }
     .wv:nth-child(2) { animation-delay: .15s; }
     .wv:nth-child(3) { animation-delay: .30s; }
     .wv:nth-child(4) { animation-delay: .45s; }
     .wv:nth-child(5) { animation-delay: .60s; }
-    @keyframes wv { 0%,100% { height: 6px; opacity: .35; } 50% { height: 24px; opacity: 1; } }
+    @keyframes wv { 0%,100% { height: 5px; opacity:.35; } 50% { height: 20px; opacity:1; } }
 
-    /* Result */
-    .result-header {
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+    /* Error inside card */
+    .err-box {
+      background: var(--err-dim); border-top: 1px solid var(--err);
+      padding: 14px 20px;
+      display: flex; gap: 10px; align-items: flex-start;
     }
-    .result-label { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
-    .dot-ok { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
-    .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .err-icon { flex-shrink: 0; width: 15px; height: 15px; fill: var(--err); margin-top: 1px; }
+    .err-title { font-size: 13px; font-weight: 500; color: var(--err); margin-bottom: 2px; }
+    .err-msg   { font-size: 12px; color: var(--err); }
+    .err-retry { font-size: 12px; color: var(--err); text-decoration: underline; cursor: pointer; margin-top: 6px; display: inline-block; }
+
+    /* ── Transcript panel (always visible) ── */
+    .transcript-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Panel header */
+    .panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      flex-shrink: 0;
+    }
+    .panel-title {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 600; color: var(--text);
+      font-family: 'Syne', sans-serif;
+    }
+    .panel-title svg { width: 14px; height: 14px; stroke: var(--text-3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--border);
+      transition: background 0.3s;
+    }
+    .status-dot.active { background: var(--success); }
+
+    /* Action buttons */
+    .panel-actions { display: flex; gap: 6px; }
 
     .btn {
       display: inline-flex; align-items: center; gap: 5px;
       font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500;
       padding: 6px 12px; border-radius: 7px; border: 1px solid transparent;
-      cursor: pointer; transition: background 0.15s, opacity 0.15s;
+      cursor: pointer; transition: background 0.15s, opacity 0.15s, color 0.15s;
+      white-space: nowrap;
     }
-    .btn:active { opacity: 0.8; }
     .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .btn:active { opacity: 0.8; }
+    .btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
 
-    .btn-ghost   { background: var(--accent-dim); color: var(--text-2); border-color: var(--border); }
-    .btn-ghost:hover { background: var(--border); }
-    .btn-solid   { background: var(--accent); color: #fff; }
-    .btn-solid:hover { background: var(--accent-2); }
-    .btn-outline { background: transparent; color: var(--text-2); border-color: var(--border); }
-    .btn-outline:hover { background: var(--accent-dim); }
-
-    .meta-row { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
-    .meta-item { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
-
-    textarea#out {
-      width: 100%; min-height: 180px;
-      background: var(--mono-bg); border: 1px solid var(--border);
-      border-radius: 10px; color: var(--text);
-      font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.75;
-      padding: 16px; resize: vertical; outline: none;
-      transition: border-color 0.15s;
+    .btn-copy {
+      background: var(--accent-dim); color: var(--accent);
+      border-color: var(--border);
     }
-    textarea#out:focus { border-color: var(--accent); }
+    .btn-copy:not(:disabled):hover { background: var(--border); }
 
-    /* Error */
-    .err-box {
-      background: var(--err-dim); border-radius: 10px;
-      border: 1px solid var(--err); padding: 14px 16px;
-      display: flex; gap: 12px; align-items: flex-start;
+    .btn-dl {
+      background: var(--accent); color: #fff;
     }
-    .err-icon { flex-shrink: 0; width: 16px; height: 16px; fill: var(--err); margin-top: 1px; }
-    .err-title { font-size: 14px; font-weight: 500; color: var(--err); margin-bottom: 3px; }
-    .err-msg   { font-size: 12px; color: var(--err); }
-    .err-retry { font-size: 12px; color: var(--err); text-decoration: underline; cursor: pointer; margin-top: 8px; display: inline-block; }
+    .btn-dl:not(:disabled):hover { background: var(--accent-2); }
+
+    .btn:disabled {
+      cursor: not-allowed;
+      background: var(--accent-dim) !important;
+      color: var(--disabled) !important;
+      border-color: var(--border) !important;
+      opacity: 0.6;
+    }
+
+    /* Transcript area */
+    .transcript-body {
+      flex: 1;
+      position: relative;
+    }
+
+    /* Placeholder */
+    .tx-placeholder {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; padding: 24px;
+      color: var(--text-3); font-size: 13px; text-align: center;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .tx-placeholder svg { width: 28px; height: 28px; stroke: var(--border); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .tx-placeholder.hidden { opacity: 0; }
+
+    textarea#txOut {
+      width: 100%;
+      height: 320px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+      padding: 18px;
+      resize: vertical;
+      outline: none;
+      display: block;
+    }
+    textarea#txOut:focus { background: var(--mono-bg); }
+
+    /* Meta bar */
+    .meta-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 9px 18px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+    }
+    .meta-stats { display: flex; gap: 14px; }
+    .meta-item { font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+    .meta-time { font-size: 11px; color: var(--success); }
 
     /* ── Features ── */
-    .features { margin-top: 28px; display: flex; gap: 20px; flex-wrap: wrap; }
-    .feat { display: flex; align-items: flex-start; gap: 10px; flex: 1 1 180px; }
-    .feat-ico {
-      width: 30px; height: 30px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; margin-top: 1px;
-    }
-    .feat-ico svg { width: 15px; height: 15px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .features { margin-top: 24px; display: flex; gap: 18px; flex-wrap: wrap; }
+    .feat { display: flex; align-items: flex-start; gap: 10px; flex: 1 1 170px; }
+    .feat-ico { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .feat-ico svg { width: 14px; height: 14px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
     .feat-ico.green  { background: #E6F8F2; } .feat-ico.green  svg { stroke: var(--success); }
     .feat-ico.violet { background: var(--accent-dim); } .feat-ico.violet svg { stroke: var(--accent); }
     .feat-ico.blue   { background: #EAF2FF; } .feat-ico.blue   svg { stroke: #2D6EE0; }
@@ -267,37 +330,31 @@
     }
     :root[data-theme="dark"] .feat-ico.green { background: #0A2A1F; }
     :root[data-theme="dark"] .feat-ico.blue  { background: #0E1E3A; }
-    .feat-text strong { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+    .feat-text strong { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 1px; }
     .feat-text span   { font-size: 12px; color: var(--text-2); line-height: 1.5; }
 
     /* ── FAQ ── */
-    .faq { margin-top: 36px; }
-    .faq h2 {
-      font-family: 'Syne', sans-serif; font-weight: 700;
-      font-size: 18px; color: var(--text); margin-bottom: 16px;
-    }
+    .faq { margin-top: 32px; }
+    .faq h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px; color: var(--text); margin-bottom: 14px; }
     details { border-bottom: 1px solid var(--border); }
     summary {
       display: flex; justify-content: space-between; align-items: center;
-      padding: 14px 0; cursor: pointer;
+      padding: 13px 0; cursor: pointer;
       font-size: 14px; font-weight: 500; color: var(--text);
       list-style: none; outline: none; gap: 12px;
     }
     summary::-webkit-details-marker { display: none; }
     summary svg { width: 14px; height: 14px; stroke: var(--text-3); fill: none; stroke-width: 2; flex-shrink: 0; transition: transform 0.2s; }
     details[open] summary svg { transform: rotate(180deg); }
-    .faq-body { font-size: 13px; color: var(--text-2); padding: 0 0 14px; line-height: 1.65; }
+    .faq-body { font-size: 13px; color: var(--text-2); padding: 0 0 13px; line-height: 1.65; }
 
-    /* ── Footer ── */
     footer {
-      text-align: center; padding: 20px 24px 32px;
+      text-align: center; padding: 16px 24px 28px;
       font-size: 12px; color: var(--text-3);
     }
 
-    @media (max-width: 480px) {
-      .drop-zone { padding: 36px 20px; }
-      .result-header { flex-direction: column; align-items: flex-start; }
-    }
+    /* Hidden helper */
+    [hidden] { display: none !important; }
   </style>
 </head>
 <body>
@@ -319,100 +376,116 @@
 
 <main>
   <div class="hero">
-    <p class="eyebrow">Free · No account · English</p>
+    <p class="eyebrow">Free &middot; No account &middot; English</p>
     <h1>Transcribe OGG to Text</h1>
-    <p class="sub">
-      Drop your OGG recording and get an accurate transcript in seconds.
-      <strong>Whisper AI runs entirely in your browser</strong> &mdash; your audio never touches a server.
-    </p>
+    <p class="sub">Drop your OGG file and get an accurate transcript instantly.
+      <strong>Whisper AI runs entirely in your browser</strong> &mdash; nothing is uploaded.</p>
   </div>
 
-  <div class="card">
-    <!-- Drop zone -->
-    <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload OGG file">
-      <div class="drop-icon">
-        <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
-      </div>
-      <div class="drop-label">
-        <strong>Drop your OGG file here</strong>
-        <span>or click to browse</span>
-      </div>
-      <div class="drop-meta">
-        <span class="chip">.ogg</span>
-        <span class="chip">.oga</span>
-        <span class="chip">up to 25 MB</span>
-      </div>
-    </div>
-    <input type="file" id="fileInput" accept=".ogg,.oga,audio/ogg,audio/*" />
+  <div class="tool-layout">
 
-    <!-- Model loading -->
-    <div class="state" id="stateModel">
-      <div class="loader-row">
-        <div class="spin"></div>
-        <div class="loader-text">
-          <strong>Loading AI model</strong>
-          <span id="modelMsg">Downloading Whisper &mdash; first time only</span>
-        </div>
-      </div>
-      <div class="track"><div class="fill" id="modelBar"></div></div>
-      <p class="track-note" id="modelPct">~100 MB &middot; cached in browser after this</p>
-    </div>
+    <!-- LEFT: Upload card -->
+    <div class="upload-card">
 
-    <!-- Transcribing -->
-    <div class="state" id="stateTx">
-      <div class="loader-row">
-        <div class="wave-row">
-          <div class="wv"></div><div class="wv"></div>
-          <div class="wv"></div><div class="wv"></div>
-          <div class="wv"></div>
+      <!-- Drop zone (shown when idle) -->
+      <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload OGG file">
+        <div class="drop-icon">
+          <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
         </div>
-        <div class="loader-text">
-          <strong id="txMsg">Transcribing audio&hellip;</strong>
-          <span id="txFile">Processing your file</span>
+        <div class="drop-label">
+          <strong>Drop your OGG file</strong>
+          <span>or click to browse</span>
+        </div>
+        <div class="drop-meta">
+          <span class="chip">.ogg</span>
+          <span class="chip">.oga</span>
+          <span class="chip">up to 25 MB</span>
         </div>
       </div>
-      <div class="track" style="margin-top:14px"><div class="fill" id="txBar" style="width:5%"></div></div>
-    </div>
+      <input type="file" id="fileInput" accept=".ogg,.oga,audio/ogg,audio/*" />
 
-    <!-- Result -->
-    <div class="state" id="stateResult">
-      <div class="result-header">
-        <div class="result-label">
-          <div class="dot-ok"></div>
-          Transcription complete
+      <!-- Model loading -->
+      <div class="upload-status" id="stateModel" hidden>
+        <div class="loader-row">
+          <div class="spin"></div>
+          <div class="loader-text">
+            <strong>Loading AI model</strong>
+            <span id="modelMsg">Downloading Whisper &mdash; first time only</span>
+          </div>
         </div>
-        <div class="btn-row">
-          <button class="btn btn-ghost" id="btnCopy">
-            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            Copy
-          </button>
-          <button class="btn btn-solid" id="btnDl">
-            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Download .txt
-          </button>
-          <button class="btn btn-outline" id="btnNew">New file</button>
-        </div>
+        <div class="track"><div class="fill" id="modelBar"></div></div>
+        <p class="track-note" id="modelPct">~100 MB &middot; cached after this</p>
       </div>
-      <div class="meta-row">
-        <span class="meta-item" id="metaWords">&mdash;</span>
-        <span class="meta-item" id="metaChars">&mdash;</span>
-        <span class="meta-item" id="metaTime">&mdash;</span>
-      </div>
-      <textarea id="out" spellcheck="false" aria-label="Transcription output"></textarea>
-    </div>
 
-    <!-- Error -->
-    <div class="state" id="stateErr">
-      <div class="err-box">
+      <!-- Transcribing -->
+      <div class="upload-status" id="stateTx" hidden>
+        <div class="loader-row">
+          <div class="wave-row">
+            <div class="wv"></div><div class="wv"></div>
+            <div class="wv"></div><div class="wv"></div>
+            <div class="wv"></div>
+          </div>
+          <div class="loader-text">
+            <strong>Transcribing&hellip;</strong>
+            <span id="txFile">Processing your file</span>
+          </div>
+        </div>
+        <div class="track" style="margin-top:12px"><div class="fill" id="txBar" style="width:5%"></div></div>
+      </div>
+
+      <!-- Error -->
+      <div class="err-box" id="stateErr" hidden>
         <svg class="err-icon" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
         <div>
-          <p class="err-title">Transcription failed</p>
-          <p class="err-msg" id="errMsg">Something went wrong. Please try again.</p>
+          <p class="err-title">Failed</p>
+          <p class="err-msg" id="errMsg">Something went wrong.</p>
           <span class="err-retry" id="errRetry">Try again</span>
         </div>
       </div>
     </div>
-  </div>
+
+    <!-- RIGHT: Transcript panel (always visible) -->
+    <div class="transcript-card">
+
+      <!-- Header with buttons -->
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="status-dot" id="statusDot"></div>
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Transcript
+        </div>
+        <div class="panel-actions">
+          <button class="btn btn-copy" id="btnCopy" disabled>
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+          <button class="btn btn-dl" id="btnDl" disabled>
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download .txt
+          </button>
+        </div>
+      </div>
+
+      <!-- Body with textarea + placeholder -->
+      <div class="transcript-body">
+        <div class="tx-placeholder" id="txPlaceholder">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          <span>Your transcript will appear here</span>
+        </div>
+        <textarea id="txOut" spellcheck="false" aria-label="Transcription output" placeholder=""></textarea>
+      </div>
+
+      <!-- Meta bar -->
+      <div class="meta-bar">
+        <div class="meta-stats">
+          <span class="meta-item" id="metaWords">0 words</span>
+          <span class="meta-item" id="metaChars">0 characters</span>
+        </div>
+        <span class="meta-time" id="metaTime"></span>
+      </div>
+    </div>
+
+  </div><!-- /tool-layout -->
 
   <!-- Features -->
   <div class="features">
@@ -422,7 +495,7 @@
       </div>
       <div class="feat-text">
         <strong>100% Private</strong>
-        <span>Audio is decoded and processed locally. Nothing is uploaded.</span>
+        <span>Audio is processed locally. Nothing is uploaded.</span>
       </div>
     </div>
     <div class="feat">
@@ -450,19 +523,19 @@
     <h2>Questions</h2>
     <details>
       <summary>Does my audio leave my device?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary>
-      <p class="faq-body">No. The Whisper model runs in your browser using WebAssembly. The only network request is the one-time model download (~100 MB from Hugging Face CDN), which is then cached. Your audio file is never transmitted anywhere.</p>
+      <p class="faq-body">No. Whisper runs in your browser via WebAssembly. The only network request is the one-time model download (~100 MB), cached permanently. Your audio is never transmitted anywhere.</p>
     </details>
     <details>
       <summary>Why does the first run take longer?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary>
-      <p class="faq-body">The Whisper Small English model (~100 MB) is downloaded from Hugging Face the first time. After that it lives in your browser cache, and subsequent runs start immediately.</p>
+      <p class="faq-body">The Whisper Small English model (~100 MB) is downloaded once from Hugging Face, then cached in your browser. Subsequent runs start immediately.</p>
     </details>
     <details>
       <summary>How accurate is it?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary>
-      <p class="faq-body">Very accurate for clear English speech &mdash; Whisper Small achieves word error rates under 5% on standard benchmarks. Background noise, heavy accents, or low-quality recordings will reduce accuracy. You can always edit the result directly in the text area.</p>
+      <p class="faq-body">Very accurate for clear English speech. Whisper Small achieves under 5% word error rate on standard benchmarks. Background noise or low-quality recordings will reduce accuracy. You can edit the result directly in the transcript panel.</p>
     </details>
     <details>
       <summary>What other formats work?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary>
-      <p class="faq-body">Optimised for OGG (.ogg, .oga). The browser's built-in audio decoder also handles MP3, WAV, M4A, and FLAC on most modern browsers &mdash; just drag one in.</p>
+      <p class="faq-body">Optimised for OGG (.ogg, .oga). The browser's audio decoder also handles MP3, WAV, M4A, and FLAC on most modern browsers.</p>
     </details>
   </div>
 </main>
@@ -471,18 +544,35 @@
 
 <script type="module">
   const $ = id => document.getElementById(id);
-  const dz = $('dropZone'), fi = $('fileInput');
-  const stModel  = $('stateModel'), modelBar = $('modelBar'), modelMsg = $('modelMsg'), modelPct = $('modelPct');
-  const stTx     = $('stateTx'),   txBar = $('txBar'), txFile = $('txFile');
-  const stResult = $('stateResult');
-  const stErr    = $('stateErr'),   errMsg = $('errMsg');
-  const out      = $('out');
+
+  // Upload side
+  const dz        = $('dropZone');
+  const fi        = $('fileInput');
+  const stModel   = $('stateModel');
+  const modelBar  = $('modelBar');
+  const modelMsg  = $('modelMsg');
+  const modelPct  = $('modelPct');
+  const stateTx   = $('stateTx');
+  const txBar     = $('txBar');
+  const txFile    = $('txFile');
+  const stErr     = $('stateErr');
+  const errMsg    = $('errMsg');
+
+  // Transcript panel
+  const txOut       = $('txOut');
+  const txPlaceholder = $('txPlaceholder');
+  const btnCopy     = $('btnCopy');
+  const btnDl       = $('btnDl');
+  const statusDot   = $('statusDot');
+  const metaWords   = $('metaWords');
+  const metaChars   = $('metaChars');
+  const metaTime    = $('metaTime');
 
   let transcriber = null;
   let modelReady  = false;
   let curName     = 'transcript';
 
-  // Drag & drop
+  // ── Drag & drop ──
   dz.addEventListener('click', () => fi.click());
   dz.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fi.click(); });
   dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('over'); });
@@ -494,33 +584,54 @@
   });
   fi.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
 
-  // State helpers
-  function hideAll() {
-    [stModel, stTx, stResult, stErr].forEach(el => el.classList.remove('visible'));
-  }
-  function show(el) { hideAll(); el.classList.add('visible'); }
+  // ── Helpers ──
   function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-  // Handle file
+  function showUploadState(which) {
+    stModel.hidden = which !== 'model';
+    stateTx.hidden = which !== 'tx';
+    stErr.hidden   = which !== 'err';
+  }
+
+  function setTranscript(text, secs) {
+    txOut.value = text;
+    // show/hide placeholder
+    txPlaceholder.classList.toggle('hidden', text.length > 0);
+    // update meta
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    metaWords.textContent = words.toLocaleString() + ' words';
+    metaChars.textContent = text.length.toLocaleString() + ' characters';
+    metaTime.textContent  = secs ? `Transcribed in ${secs}s` : '';
+    // enable/disable buttons
+    const hasText = text.length > 0;
+    btnCopy.disabled = !hasText;
+    btnDl.disabled   = !hasText;
+    statusDot.classList.toggle('active', hasText);
+  }
+
+  // Update word/char count live as user edits
+  txOut.addEventListener('input', () => setTranscript(txOut.value, null));
+
+  // ── Handle file ──
   async function handleFile(file) {
     if (file.size > 25 * 1024 * 1024) {
-      showErr('File exceeds 25 MB. Please use a smaller file.');
+      errMsg.textContent = 'File exceeds 25 MB. Please use a smaller file.';
+      showUploadState('err');
       return;
     }
-    // No minimum size — even a few seconds of audio works fine.
     curName = file.name.replace(/\.[^.]+$/, '');
 
     try {
       // Load model on first use
       if (!modelReady) {
-        show(stModel);
+        showUploadState('model');
         transcriber = await loadModel();
-        modelReady = true;
+        modelReady  = true;
       }
 
       // Transcribe
       txFile.textContent = file.name;
-      show(stTx);
+      showUploadState('tx');
 
       let fake = 5;
       const iv = setInterval(() => {
@@ -536,29 +647,30 @@
         chunk_length_s: 30,
         stride_length_s: 5,
         return_timestamps: false,
-        // For long files Whisper chunks automatically — no extra config needed
       });
 
       clearInterval(iv);
       URL.revokeObjectURL(url);
       txBar.style.width = '100%';
-      await delay(250);
-      showResult(res.text.trim(), ((Date.now() - t0) / 1000).toFixed(1));
+      await delay(200);
+
+      showUploadState(null);  // back to drop zone
+      setTranscript(res.text.trim(), ((Date.now() - t0) / 1000).toFixed(1));
 
     } catch (err) {
       console.error(err);
-      showErr(err.message || 'Transcription failed. Please try a different file.');
+      errMsg.textContent = err.message || 'Transcription failed. Please try a different file.';
+      showUploadState('err');
     }
   }
 
-  // Load Whisper model
+  // ── Load model ──
   async function loadModel() {
     const { pipeline, env } = await import(
       'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js'
     );
     env.allowLocalModels = false;
     env.useBrowserCache  = true;
-
     return pipeline('automatic-speech-recognition', 'Xenova/whisper-small.en', {
       progress_callback: d => {
         if (d.status === 'downloading') {
@@ -566,46 +678,34 @@
           modelBar.style.width = p + '%';
           const loaded = d.loaded ? (d.loaded / 1e6).toFixed(1) : '?';
           const total  = d.total  ? (d.total  / 1e6).toFixed(1) : '?';
-          modelMsg.textContent = `Downloading model: ${p}%`;
-          modelPct.textContent = `${loaded} MB / ${total} MB · cached after this`;
+          modelMsg.textContent = `Downloading: ${p}%`;
+          modelPct.textContent = `${loaded} MB / ${total} MB &middot; cached after this`;
         } else if (d.status === 'loading') {
-          modelMsg.textContent = 'Initialising…';
+          modelMsg.textContent = 'Initialising&hellip;';
           modelBar.style.width = '95%';
         } else if (d.status === 'ready') {
           modelBar.style.width = '100%';
-          modelMsg.textContent = 'Model ready';
         }
       }
     });
   }
 
-  // Show result
-  function showResult(text, secs) {
-    out.value = text;
-    const words = text.split(/\s+/).filter(Boolean).length;
-    $('metaWords').textContent = words.toLocaleString() + ' words';
-    $('metaChars').textContent = text.length.toLocaleString() + ' characters';
-    $('metaTime').textContent  = `Transcribed in ${secs}s`;
-    show(stResult);
-  }
-
-  function showErr(msg) { errMsg.textContent = msg; show(stErr); }
-
-  // Copy
-  $('btnCopy').addEventListener('click', async () => {
+  // ── Copy ──
+  btnCopy.addEventListener('click', async () => {
+    if (!txOut.value) return;
     try {
-      await navigator.clipboard.writeText(out.value);
-      const btn = $('btnCopy');
-      btn.textContent = 'Copied!';
+      await navigator.clipboard.writeText(txOut.value);
+      btnCopy.textContent = 'Copied!';
       setTimeout(() => {
-        btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy`;
+        btnCopy.innerHTML = `<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy`;
       }, 2000);
-    } catch {}
+    } catch { /* clipboard blocked */ }
   });
 
-  // Download
-  $('btnDl').addEventListener('click', () => {
-    const blob = new Blob([out.value], { type: 'text/plain' });
+  // ── Download ──
+  btnDl.addEventListener('click', () => {
+    if (!txOut.value) return;
+    const blob = new Blob([txOut.value], { type: 'text/plain' });
     const a = Object.assign(document.createElement('a'), {
       href: URL.createObjectURL(blob),
       download: curName + '.txt',
@@ -614,8 +714,8 @@
     URL.revokeObjectURL(a.href);
   });
 
-  $('btnNew').addEventListener('click',   () => { hideAll(); fi.value = ''; });
-  $('errRetry').addEventListener('click', () => { hideAll(); fi.value = ''; });
+  // ── Retry ──
+  $('errRetry').addEventListener('click', () => { showUploadState(null); fi.value = ''; });
 </script>
 </body>
 </html>
