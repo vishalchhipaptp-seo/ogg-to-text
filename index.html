@@ -54,7 +54,7 @@
 
     /* ── Header ── */
     header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40;}
-    .header-inner{max-width:780px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
+    .header-inner{max-width:min(80vw,1400px);margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
     .logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text);text-decoration:none;}
     .logo-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .logo-mark svg{width:16px;height:16px;fill:#fff;}
@@ -62,7 +62,7 @@
     .badge-private svg{width:13px;height:13px;stroke:var(--success);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
     /* ── Main ── */
-    main{max-width:780px;margin:0 auto;padding:40px 24px 64px;}
+    main{max-width:min(80vw,1400px);margin:0 auto;padding:40px 24px 64px;}
     .hero{margin-bottom:28px;}
     .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
     h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(26px,4.5vw,38px);line-height:1.12;letter-spacing:-.02em;color:var(--text);text-wrap:balance;margin-bottom:10px;}
@@ -337,8 +337,8 @@
       </div>
       <div class="meta-bar">
         <div class="meta-stats">
-          <span class="meta-item" id="metaWords">0 words</span>
-          <span class="meta-item" id="metaChars">0 characters</span>
+          <span class="meta-item" id="metaWords"></span>
+          <span class="meta-item" id="metaChars"></span>
         </div>
         <span class="meta-time" id="metaTime"></span>
       </div>
@@ -545,8 +545,8 @@
     txPlaceholder.classList.toggle('hidden', text.length > 0);
 
     var words = text.trim().split(/\s+/).filter(Boolean).length;
-    metaWords.textContent = words.toLocaleString() + ' words';
-    metaChars.textContent = text.length.toLocaleString() + ' characters';
+    metaWords.textContent = has ? words.toLocaleString() + ' words' : '';
+    metaChars.textContent = has ? text.length.toLocaleString() + ' characters' : '';
     metaTime.textContent  = doneCount > 0
       ? doneCount + ' file' + (doneCount > 1 ? 's' : '') + ' in ' + (elapsedMs / 1000).toFixed(1) + 's'
       : '';
@@ -560,10 +560,10 @@
   // Live word count when user edits
   txOut.addEventListener('input', function() {
     var text  = txOut.value;
+    var has   = text.length > 0;
     var words = text.trim().split(/\s+/).filter(Boolean).length;
-    metaWords.textContent = words.toLocaleString() + ' words';
-    metaChars.textContent = text.length.toLocaleString() + ' characters';
-    var has = text.length > 0;
+    metaWords.textContent = has ? words.toLocaleString() + ' words' : '';
+    metaChars.textContent = has ? text.length.toLocaleString() + ' characters' : '';
     btnCopy.disabled = !has;
     btnDl.disabled   = !has;
     statusDot.classList.toggle('active', has);
