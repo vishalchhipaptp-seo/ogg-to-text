@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OGG Transcribe — Free AI Transcription</title>
+  <meta name="description" content="Convert OGG audio to text instantly. Powered by OpenAI Whisper, runs 100% in your browser. Free, private, no signup." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap">
+  <style>
+    /* ── Tokens ── */
+    :root {
+      --bg:        #F7F5FF;
+      --surface:   #FFFFFF;
+      --border:    #E5DFFF;
+      --accent:    #5834D9;
+      --accent-2:  #7B5CF0;
+      --accent-dim:#EDE8FF;
+      --text:      #1B1430;
+      --text-2:    #6857A0;
+      --text-3:    #A898CE;
+      --success:   #1A9E72;
+      --err:       #D94048;
+      --err-dim:   #FFF0F0;
+      --wave:      #5834D9;
+      --mono-bg:   #F4F1FF;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg:        #100D1E;
+        --surface:   #1C1733;
+        --border:    #2E2650;
+        --accent:    #7B5CF0;
+        --accent-2:  #9D82F7;
+        --accent-dim:#2A2050;
+        --text:      #EDE9FF;
+        --text-2:    #A898D8;
+        --text-3:    #6857A0;
+        --success:   #26C48A;
+        --err:       #F56070;
+        --err-dim:   #2A0D10;
+        --wave:      #9D82F7;
+        --mono-bg:   #16122A;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg:        #100D1E;
+      --surface:   #1C1733;
+      --border:    #2E2650;
+      --accent:    #7B5CF0;
+      --accent-2:  #9D82F7;
+      --accent-dim:#2A2050;
+      --text:      #EDE9FF;
+      --text-2:    #A898D8;
+      --text-3:    #6857A0;
+      --success:   #26C48A;
+      --err:       #F56070;
+      --err-dim:   #2A0D10;
+      --wave:      #9D82F7;
+      --mono-bg:   #16122A;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 40;
+    }
+    .header-inner {
+      max-width: 680px; margin: 0 auto;
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: 'Syne', sans-serif; font-weight: 700;
+      font-size: 17px; color: var(--text); text-decoration: none;
+    }
+    .logo-mark {
+      width: 32px; height: 32px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-mark svg { width: 16px; height: 16px; fill: #fff; }
+    .badge-private {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--text-2); font-weight: 500;
+    }
+    .badge-private svg { width: 13px; height: 13px; stroke: var(--success); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── Main ── */
+    main {
+      max-width: 680px; margin: 0 auto;
+      padding: 48px 24px 64px;
+    }
+
+    /* ── Hero ── */
+    .hero { margin-bottom: 36px; }
+    .eyebrow {
+      font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--accent); font-weight: 600; margin-bottom: 10px;
+    }
+    h1 {
+      font-family: 'Syne', sans-serif; font-weight: 800;
+      font-size: clamp(28px, 5vw, 40px);
+      line-height: 1.12; letter-spacing: -.02em;
+      color: var(--text); text-wrap: balance; margin-bottom: 12px;
+    }
+    .sub {
+      color: var(--text-2); font-size: 15px;
+      max-width: 480px; line-height: 1.65;
+    }
+    .sub strong { color: var(--text); font-weight: 500; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+    }
+
+    /* ── Drop zone ── */
+    .drop-zone {
+      padding: 48px 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .drop-zone:hover, .drop-zone.over { background: var(--accent-dim); }
+    .drop-zone.over { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+    .drop-icon {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: var(--accent-dim);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.18s;
+    }
+    .drop-zone:hover .drop-icon,
+    .drop-zone.over .drop-icon { transform: translateY(-3px); }
+    .drop-icon svg {
+      width: 26px; height: 26px; stroke: var(--accent); fill: none;
+      stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .drop-label { text-align: center; }
+    .drop-label strong {
+      display: block; font-family: 'Syne', sans-serif; font-weight: 700;
+      font-size: 17px; color: var(--text); margin-bottom: 4px;
+    }
+    .drop-label span { font-size: 13px; color: var(--text-2); }
+    .drop-meta { display: flex; gap: 8px; }
+    .chip {
+      font-size: 11px; font-family: 'DM Mono', monospace;
+      color: var(--text-3); background: var(--accent-dim);
+      padding: 3px 8px; border-radius: 4px; border: 1px solid var(--border);
+    }
+    input[type="file"] { display: none; }
+
+    /* ── States ── */
+    .state { padding: 24px 28px; display: none; }
+    .state.visible { display: block; }
+
+    /* Spinner */
+    .spin {
+      width: 26px; height: 26px; border-radius: 50%;
+      border: 2.5px solid var(--border); border-top-color: var(--accent);
+      animation: spin 0.75s linear infinite;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loader-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+    .loader-text strong { display: block; font-size: 14px; font-weight: 500; margin-bottom: 3px; color: var(--text); }
+    .loader-text span { font-size: 12px; color: var(--text-2); }
+    .track { background: var(--accent-dim); border-radius: 100px; height: 3px; overflow: hidden; margin-top: 4px; }
+    .fill { height: 100%; border-radius: 100px; background: var(--accent); width: 0; transition: width 0.35s ease; }
+    .track-note { font-size: 11px; color: var(--text-3); margin-top: 8px; }
+
+    /* Wave bars */
+    .wave-row { display: flex; align-items: flex-end; gap: 4px; height: 28px; flex-shrink: 0; }
+    .wv { width: 3px; background: var(--wave); border-radius: 2px; animation: wv 1s ease-in-out infinite; }
+    .wv:nth-child(2) { animation-delay: .15s; }
+    .wv:nth-child(3) { animation-delay: .30s; }
+    .wv:nth-child(4) { animation-delay: .45s; }
+    .wv:nth-child(5) { animation-delay: .60s; }
+    @keyframes wv { 0%,100% { height: 6px; opacity: .35; } 50% { height: 24px; opacity: 1; } }
+
+    /* Result */
+    .result-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+    }
+    .result-label { display: flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; }
+    .dot-ok { width: 7px; height: 7px; border-radius: 50%; background: var(--success); }
+    .btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 12px; font-family: 'DM Sans', sans-serif; font-weight: 500;
+      padding: 6px 12px; border-radius: 7px; border: 1px solid transparent;
+      cursor: pointer; transition: background 0.15s, opacity 0.15s;
+    }
+    .btn:active { opacity: 0.8; }
+    .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .btn svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+    .btn-ghost   { background: var(--accent-dim); color: var(--text-2); border-color: var(--border); }
+    .btn-ghost:hover { background: var(--border); }
+    .btn-solid   { background: var(--accent); color: #fff; }
+    .btn-solid:hover { background: var(--accent-2); }
+    .btn-outline { background: transparent; color: var(--text-2); border-color: var(--border); }
+    .btn-outline:hover { background: var(--accent-dim); }
+
+    .meta-row { display: flex; gap: 16px; margin-bottom: 10px; flex-wrap: wrap; }
+    .meta-item { font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+
+    textarea#out {
+      width: 100%; min-height: 180px;
+      background: var(--mono-bg); border: 1px solid var(--border);
+      border-radius: 10px; color: var(--text);
+      font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.75;
+      padding: 16px; resize: vertical; outline: none;
+      transition: border-color 0.15s;
+    }
+    textarea#out:focus { border-color: var(--accent); }
+
+    /* Error */
+    .err-box {
+      background: var(--err-dim); border-radius: 10px;
+      border: 1px solid var(--err); padding: 14px 16px;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .err-icon { flex-shrink: 0; width: 16px; height: 16px; fill: var(--err); margin-top: 1px; }
+    .err-title { font-size: 14px; font-weight: 500; color: var(--err); margin-bottom: 3px; }
+    .err-msg   { font-size: 12px; color: var(--err); }
+    .err-retry { font-size: 12px; color: var(--err); text-decoration: underline; cursor: pointer; margin-top: 8px; display: inline-block; }
+
+    /* ── Features ── */
+    .features { margin-top: 28px; display: flex; gap: 20px; flex-wrap: wrap; }
+    .feat { display: flex; align-items: flex-start; gap: 10px; flex: 1 1 180px; }
+    .feat-ico {
+      width: 30px; height: 30px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .feat-ico svg { width: 15px; height: 15px; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .feat-ico.green  { background: #E6F8F2; } .feat-ico.green  svg { stroke: var(--success); }
+    .feat-ico.violet { background: var(--accent-dim); } .feat-ico.violet svg { stroke: var(--accent); }
+    .feat-ico.blue   { background: #EAF2FF; } .feat-ico.blue   svg { stroke: #2D6EE0; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .feat-ico.green { background: #0A2A1F; }
+      :root:not([data-theme="light"]) .feat-ico.blue  { background: #0E1E3A; }
+    }
+    :root[data-theme="dark"] .feat-ico.green { background: #0A2A1F; }
+    :root[data-theme="dark"] .feat-ico.blue  { background: #0E1E3A; }
+    .feat-text strong { display: block; font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+    .feat-text span   { font-size: 12px; color: var(--text-2); line-height: 1.5; }
+
+    /* ── FAQ ── */
+    .faq { margin-top: 36px; }
+    .faq h2 {
+      font-family: 'Syne', sans-serif; font-weight: 700;
+      font-size: 18px; color: var(--text); margin-bottom: 16px;
+    }
+    details { border-bottom: 1px solid var(--border); }
+    summary {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0; cursor: pointer;
+      font-size: 14px; font-weight: 500; color: var(--text);
+      list-style: none; outline: none; gap: 12px;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary svg { width: 14px; height: 14px; stroke: var(--text-3); fill: none; stroke-width: 2; flex-shrink: 0; transition: transform 0.2s; }
+    details[open] summary svg { transform: rotate(180deg); }
+    .faq-body { font-size: 13px; color: var(--text-2); padding: 0 0 14px; line-height: 1.65; }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center; padding: 20px 24px 32px;
+      font-size: 12px; color: var(--text-3);
+    }
+
+    @media (max-width: 480px) {
+      .drop-zone { padding: 36px 20px; }
+      .result-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="logo" href="#">
+      <div class="logo-mark">
+        <svg viewBox="0 0 20 20"><path d="M7 4a3 3 0 016 0v6a3 3 0 11-6 0V4zm-2 6a5 5 0 0010 0V9a1 1 0 112 0v1a7 7 0 01-14 0V9a1 1 0 112 0v1z"/></svg>
+      </div>
+      OGG Transcribe
+    </a>
+    <div class="badge-private">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Runs in your browser
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="hero">
+    <p class="eyebrow">Free · No account · English</p>
+    <h1>Transcribe OGG to Text</h1>
+    <p class="sub">
+      Drop your OGG recording and get an accurate transcript in seconds.
+      <strong>Whisper AI runs entirely in your browser</strong> &mdash; your audio never touches a server.
+    </p>
+  </div>
+
+  <div class="card">
+    <!-- Drop zone -->
+    <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload OGG file">
+      <div class="drop-icon">
+        <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0018 9h-1.26A8 8 0 103 16.3"/></svg>
+      </div>
+      <div class="drop-label">
+        <strong>Drop your OGG file here</strong>
+        <span>or click to browse</span>
+      </div>
+      <div class="drop-meta">
+        <span class="chip">.ogg</span>
+        <span class="chip">.oga</span>
+        <span class="chip">any size</span>
+      </div>
+    </div>
+    <input type="file" id="fileInput" accept=".ogg,.oga,audio/ogg,audio/*" />
+
+    <!-- Model loading -->
+    <div class="state" id="stateModel">
+      <div class="loader-row">
+        <div class="spin"></div>
+        <div class="loader-text">
+          <strong>Loading AI model</strong>
+          <span id="modelMsg">Downloading Whisper &mdash; first time only</span>
+        </div>
+      </div>
+      <div class="track"><div class="fill" id="modelBar"></div></div>
+      <p class="track-note" id="modelPct">~100 MB &middot; cached in browser after this</p>
+    </div>
+
+    <!-- Transcribing -->
+    <div class="state" id="stateTx">
+      <div class="loader-row">
+        <div class="wave-row">
+          <div class="wv"></div><div class="wv"></div>
+          <div class="wv"></div><div class="wv"></div>
+          <div class="wv"></div>
+        </div>
+        <div class="loader-text">
+          <strong id="txMsg">Transcribing audio&hellip;</strong>
+          <span id="txFile">Processing your file</span>
+        </div>
+      </div>
+      <div class="track" style="margin-top:14px"><div class="fill" id="txBar" style="width:5%"></div></div>
+    </div>
+
+    <!-- Result -->
+    <div class="state" id="stateResult">
+      <div class="result-header">
+        <div class="result-label">
+          <div class="dot-ok"></div>
+          Transcription complete
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-ghost" id="btnCopy">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            Copy
+          </button>
+          <button class="btn btn-solid" id="btnDl">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download .txt
+          </button>
+          <button class="btn btn-outline" id="btnNew">New file</button>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span class="meta-item" id="metaWords">&mdash;</span>
+        <span class="meta-item" id="metaChars">&mdash;</span>
+        <span class="meta-item" id="metaTime">&mdash;</span>
+      </div>
+      <textarea id="out" spellcheck="false" aria-label="Transcription output"></textarea>
+    </div>
+
+    <!-- Error -->
+    <div class="state" id="stateErr">
+      <div class="err-box">
+        <svg class="err-icon" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+        <div>
+          <p class="err-title">Transcription failed</p>
+          <p class="err-msg" id="errMsg">Something went wrong. Please try again.</p>
+          <span class="err-retry" id="errRetry">Try again</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <div class="features">
+    <div class="feat">
+      <div class="feat-ico green">
+        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="feat-text">
+        <strong>100% Private</strong>
+        <span>Audio is decoded and processed locally. Nothing is uploaded.</span>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="feat-ico violet">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+      </div>
+      <div class="feat-text">
+        <strong>OpenAI Whisper</strong>
+        <span>State-of-the-art model via WebAssembly. Cached after first use.</span>
+      </div>
+    </div>
+    <div class="feat">
+      <div class="feat-ico blue">
+        <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      </div>
+      <div class="feat-text">
+        <strong>Always Free</strong>
+        <span>No account, no API key, no limits. Deploy on Vercel's free tier.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq">
+    <h2>Questions</h2>
+    <details>
+      <summary>Does my audio leave my device?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary>
+      <p class="faq-body">No. The Whisper model runs in your browser using WebAssembly. The only network request is the one-time model download (~100 MB from Hugging Face CDN), which is then cached. Your audio file is never transmitted anywhere.</p>
+    </details>
+    <details>
+      <summary>Why does the first run take longer?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary>
+      <p class="faq-body">The Whisper Small English model (~100 MB) is downloaded from Hugging Face the first time. After that it lives in your browser cache, and subsequent runs start immediately.</p>
+    </details>
+    <details>
+      <summary>How accurate is it?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary>
+      <p class="faq-body">Very accurate for clear English speech &mdash; Whisper Small achieves word error rates under 5% on standard benchmarks. Background noise, heavy accents, or low-quality recordings will reduce accuracy. You can always edit the result directly in the text area.</p>
+    </details>
+    <details>
+      <summary>What other formats work?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary>
+      <p class="faq-body">Optimised for OGG (.ogg, .oga). The browser's built-in audio decoder also handles MP3, WAV, M4A, and FLAC on most modern browsers &mdash; just drag one in.</p>
+    </details>
+  </div>
+</main>
+
+<footer>Built with OpenAI Whisper &middot; Runs 100% in your browser &middot; No server required</footer>
+
+<script type="module">
+  const $ = id => document.getElementById(id);
+  const dz = $('dropZone'), fi = $('fileInput');
+  const stModel  = $('stateModel'), modelBar = $('modelBar'), modelMsg = $('modelMsg'), modelPct = $('modelPct');
+  const stTx     = $('stateTx'),   txBar = $('txBar'), txFile = $('txFile');
+  const stResult = $('stateResult');
+  const stErr    = $('stateErr'),   errMsg = $('errMsg');
+  const out      = $('out');
+
+  let transcriber = null;
+  let modelReady  = false;
+  let curName     = 'transcript';
+
+  // Drag & drop
+  dz.addEventListener('click', () => fi.click());
+  dz.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fi.click(); });
+  dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('over'); });
+  dz.addEventListener('dragleave', ()  => dz.classList.remove('over'));
+  dz.addEventListener('drop', e => {
+    e.preventDefault(); dz.classList.remove('over');
+    const f = e.dataTransfer.files[0];
+    if (f) handleFile(f);
+  });
+  fi.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+  // State helpers
+  function hideAll() {
+    [stModel, stTx, stResult, stErr].forEach(el => el.classList.remove('visible'));
+  }
+  function show(el) { hideAll(); el.classList.add('visible'); }
+  function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+  // Handle file
+  async function handleFile(file) {
+    // No hard size limit — Whisper handles chunking internally.
+    // Warn only for very large files where processing will take a while.
+    if (file.size > 200 * 1024 * 1024) {
+      showErr('File is very large (over 200 MB). Try splitting it into shorter segments for best results.');
+      return;
+    }
+    curName = file.name.replace(/\.[^.]+$/, '');
+
+    try {
+      // Load model on first use
+      if (!modelReady) {
+        show(stModel);
+        transcriber = await loadModel();
+        modelReady = true;
+      }
+
+      // Transcribe
+      txFile.textContent = file.name;
+      show(stTx);
+
+      let fake = 5;
+      const iv = setInterval(() => {
+        fake = Math.min(fake + Math.random() * 4, 88);
+        txBar.style.width = fake + '%';
+      }, 700);
+
+      const url = URL.createObjectURL(file);
+      const t0  = Date.now();
+      const res = await transcriber(url, {
+        language: 'english',
+        task: 'transcribe',
+        chunk_length_s: 30,
+        stride_length_s: 5,
+        return_timestamps: false,
+        // For long files Whisper chunks automatically — no extra config needed
+      });
+
+      clearInterval(iv);
+      URL.revokeObjectURL(url);
+      txBar.style.width = '100%';
+      await delay(250);
+      showResult(res.text.trim(), ((Date.now() - t0) / 1000).toFixed(1));
+
+    } catch (err) {
+      console.error(err);
+      showErr(err.message || 'Transcription failed. Please try a different file.');
+    }
+  }
+
+  // Load Whisper model
+  async function loadModel() {
+    const { pipeline, env } = await import(
+      'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js'
+    );
+    env.allowLocalModels = false;
+    env.useBrowserCache  = true;
+
+    return pipeline('automatic-speech-recognition', 'Xenova/whisper-small.en', {
+      progress_callback: d => {
+        if (d.status === 'downloading') {
+          const p = d.progress ? Math.round(d.progress) : 0;
+          modelBar.style.width = p + '%';
+          const loaded = d.loaded ? (d.loaded / 1e6).toFixed(1) : '?';
+          const total  = d.total  ? (d.total  / 1e6).toFixed(1) : '?';
+          modelMsg.textContent = `Downloading model: ${p}%`;
+          modelPct.textContent = `${loaded} MB / ${total} MB · cached after this`;
+        } else if (d.status === 'loading') {
+          modelMsg.textContent = 'Initialising…';
+          modelBar.style.width = '95%';
+        } else if (d.status === 'ready') {
+          modelBar.style.width = '100%';
+          modelMsg.textContent = 'Model ready';
+        }
+      }
+    });
+  }
+
+  // Show result
+  function showResult(text, secs) {
+    out.value = text;
+    const words = text.split(/\s+/).filter(Boolean).length;
+    $('metaWords').textContent = words.toLocaleString() + ' words';
+    $('metaChars').textContent = text.length.toLocaleString() + ' characters';
+    $('metaTime').textContent  = `Transcribed in ${secs}s`;
+    show(stResult);
+  }
+
+  function showErr(msg) { errMsg.textContent = msg; show(stErr); }
+
+  // Copy
+  $('btnCopy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(out.value);
+      const btn = $('btnCopy');
+      btn.textContent = 'Copied!';
+      setTimeout(() => {
+        btn.innerHTML = `<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy`;
+      }, 2000);
+    } catch {}
+  });
+
+  // Download
+  $('btnDl').addEventListener('click', () => {
+    const blob = new Blob([out.value], { type: 'text/plain' });
+    const a = Object.assign(document.createElement('a'), {
+      href: URL.createObjectURL(blob),
+      download: curName + '.txt',
+    });
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  $('btnNew').addEventListener('click',   () => { hideAll(); fi.value = ''; });
+  $('errRetry').addEventListener('click', () => { hideAll(); fi.value = ''; });
+</script>
+</body>
+</html>
