@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OGG Transcribe — Free AI Transcription</title>
-  <meta name="description" content="Convert OGG audio to text instantly. Powered by OpenAI Whisper, runs 100% in your browser. Free, private, no signup." />
+  <meta name="description" content="Convert OGG audio to text instantly. Powered by OpenAI Whisper via server API. Free, no signup, English only." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap">
   <style>
@@ -243,7 +243,7 @@
     </a>
     <div class="badge-private">
       <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      Runs in your browser
+      Free &middot; No account
     </div>
   </div>
 </header>
@@ -253,7 +253,7 @@
     <p class="eyebrow">Free &middot; No account &middot; English</p>
     <h1>Transcribe OGG to Text</h1>
     <p class="sub">Drop one or more OGG files (total under 25 MB) and get accurate transcripts instantly.
-      <strong>Whisper AI runs entirely in your browser</strong> &mdash; nothing is uploaded.</p>
+      <strong>Powered by OpenAI Whisper large-v3</strong> via server API &mdash; no account, no cost.</p>
   </div>
 
   <div class="tool-layout">
@@ -287,17 +287,15 @@
         <div class="size-track"><div class="size-fill" id="sizeFill"></div></div>
       </div>
 
-      <!-- Model loading -->
+      <!-- Transcribing indicator -->
       <div class="upload-status" id="stateModel" hidden>
         <div class="loader-row">
           <div class="spin"></div>
           <div class="loader-text">
-            <strong>Loading AI model</strong>
-            <span id="modelMsg">Downloading Whisper &mdash; first time only</span>
+            <strong id="modelMsg">Transcribing&hellip;</strong>
+            <span id="modelPct">Sending audio to Whisper API</span>
           </div>
         </div>
-        <div class="track"><div class="fill" id="modelBar"></div></div>
-        <p class="track-note" id="modelPct">~100 MB &middot; cached after this</p>
       </div>
 
       <!-- Error -->
@@ -351,31 +349,31 @@
   <!-- Features -->
   <div class="features">
     <div class="feat">
-      <div class="feat-ico green"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-      <div class="feat-text"><strong>100% Private</strong><span>Audio processed locally. Nothing is uploaded anywhere.</span></div>
+      <div class="feat-ico green"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div class="feat-text"><strong>No account needed</strong><span>No sign-up, no API key from you. Just upload and transcribe.</span></div>
     </div>
     <div class="feat">
       <div class="feat-ico violet"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg></div>
-      <div class="feat-text"><strong>OpenAI Whisper</strong><span>State-of-the-art model via WebAssembly. Cached after first use.</span></div>
+      <div class="feat-text"><strong>Whisper large-v3</strong><span>OpenAI's best speech model. Under 5% word error rate on clear English.</span></div>
     </div>
     <div class="feat">
       <div class="feat-ico blue"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-      <div class="feat-text"><strong>Always Free</strong><span>No account, no API key. Deploy on Vercel's free tier.</span></div>
+      <div class="feat-text"><strong>Always Free</strong><span>Hosted on Vercel's free tier. No rate limits for normal use.</span></div>
     </div>
   </div>
 
   <div class="faq">
     <h2>Questions</h2>
-    <details><summary>Does my audio leave my device?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">No. Whisper runs in your browser via WebAssembly. The only network request is the one-time model download (~100 MB), cached permanently. Your audio is never transmitted anywhere.</p></details>
-    <details><summary>Why does the first run take longer?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">The Whisper Small English model (~100 MB) is downloaded once from Hugging Face, then cached. Subsequent runs start immediately.</p></details>
-    <details><summary>Can I transcribe multiple files?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">Yes — select or drop multiple OGG files at once. They are transcribed one by one and all transcripts appear in the panel separated by file name headers. Total size must stay under 25 MB.</p></details>
-    <details><summary>How accurate is it?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">Very accurate for clear English speech — under 5% word error rate on standard benchmarks. You can edit any result directly in the transcript panel before copying or downloading.</p></details>
+    <details><summary>Where is my audio processed?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">Your OGG file is sent to a serverless API that calls the Hugging Face Inference API (Whisper large-v3) or AssemblyAI as a fallback. Neither service stores your audio after transcription. No audio is ever retained by this tool.</p></details>
+    <details><summary>Why does it sometimes take 20-30 seconds?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">If the Hugging Face model is cold (no recent use), it needs ~20 seconds to wake up. After that first request, responses are fast. AssemblyAI (the fallback) adds an upload step but is usually quicker for longer files.</p></details>
+    <details><summary>Can I transcribe multiple files?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">Yes. Select or drop multiple OGG files at once (total under 25 MB). They are processed one by one and all transcripts appear in the panel, separated by file name headers.</p></details>
+    <details><summary>How accurate is it?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">Whisper large-v3 achieves under 5% word error rate on clear English speech. You can edit the result directly in the transcript panel before copying or downloading.</p></details>
   </div>
 </main>
 
-<footer>Built with OpenAI Whisper &middot; Runs 100% in your browser &middot; No server required</footer>
+<footer>Built with OpenAI Whisper large-v3 &middot; Hosted free on Vercel &middot; No account required</footer>
 
-<script type="module">
+<script>
   const $ = id => document.getElementById(id);
 
   // DOM
@@ -386,7 +384,6 @@
   const totalInfo  = $('totalInfo');
   const sizeFill   = $('sizeFill');
   const stModel    = $('stateModel');
-  const modelBar   = $('modelBar');
   const modelMsg   = $('modelMsg');
   const modelPct   = $('modelPct');
   const stErr      = $('stateErr');
@@ -400,9 +397,7 @@
   const metaChars  = $('metaChars');
   const metaTime   = $('metaTime');
 
-  const MAX_TOTAL  = 25 * 1024 * 1024; // 25 MB
-  let transcriber  = null;
-  let modelReady   = false;
+  const MAX_TOTAL  = 25 * 1024 * 1024; // 25 MB — no minimum, even a few seconds works
   let queue        = [];   // {id, file, name, status, transcript}
   let isRunning    = false;
 
@@ -428,14 +423,14 @@
     const incoming    = files.reduce((s, f) => s + f.size, 0);
 
     if (totalBefore + incoming > MAX_TOTAL) {
-      errMsg.textContent = `Total size would exceed 25 MB. Current: ${fmt(totalBefore)}, adding: ${fmt(incoming)}.`;
+      errMsg.textContent = 'Total size would exceed 25 MB. Current: ' + fmt(totalBefore) + ', adding: ' + fmt(incoming) + '.';
       stErr.hidden = false;
       return;
     }
 
-    files.forEach(file => {
-      const id = Math.random().toString(36).slice(2);
-      queue.push({ id, file, name: file.name, status: 'queued', transcript: '' });
+    files.forEach(function(file) {
+      var id = Math.random().toString(36).slice(2);
+      queue.push({ id: id, file: file, name: file.name, status: 'queued', transcript: '' });
     });
 
     renderQueue();
@@ -451,94 +446,82 @@
     totalBar.hidden = false;
     dz.classList.add('compact');
 
-    queue.forEach(item => {
-      const li = document.createElement('li');
+    queue.forEach(function(item) {
+      var li = document.createElement('li');
       li.className = 'file-item' + (item.status === 'processing' ? ' is-processing' : '');
       li.dataset.id = item.id;
 
-      const iconSvg = item.status === 'done'
-        ? `<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--success);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg>`
+      var iconSvg = item.status === 'done'
+        ? '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--success);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg>'
         : item.status === 'error'
-        ? `<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--err);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
-        : `<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`;
+        ? '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--err);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
+        : '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
 
-      const iconBg = item.status === 'done' ? 'background:var(--success-dim)' : item.status === 'error' ? 'background:var(--err-dim)' : '';
+      var iconBg = item.status === 'done' ? 'background:var(--success-dim)' : item.status === 'error' ? 'background:var(--err-dim)' : '';
 
-      let badge = '';
-      if (item.status === 'queued')     badge = `<span class="badge badge-queued">Queued</span>`;
-      if (item.status === 'processing') badge = `<span class="badge badge-processing"><span class="mini-wave"><span class="mw"></span><span class="mw"></span><span class="mw"></span></span>Processing</span>`;
-      if (item.status === 'done')       badge = `<span class="badge badge-done">Done</span>`;
-      if (item.status === 'error')      badge = `<span class="badge badge-error">Error</span>`;
+      var badge = '';
+      if (item.status === 'queued')     badge = '<span class="badge badge-queued">Queued</span>';
+      if (item.status === 'processing') badge = '<span class="badge badge-processing"><span class="mini-wave"><span class="mw"></span><span class="mw"></span><span class="mw"></span></span>Processing</span>';
+      if (item.status === 'done')       badge = '<span class="badge badge-done">Done</span>';
+      if (item.status === 'error')      badge = '<span class="badge badge-error">Error</span>';
 
-      li.innerHTML = `
-        <div class="fi-icon" style="${iconBg}">${iconSvg}</div>
-        <div class="fi-info">
-          <div class="fi-name" title="${item.name}">${item.name}</div>
-          <div class="fi-size">${fmt(item.file.size)}</div>
-        </div>
-        <div class="fi-status">${badge}</div>`;
+      li.innerHTML =
+        '<div class="fi-icon" style="' + iconBg + '">' + iconSvg + '</div>' +
+        '<div class="fi-info">' +
+          '<div class="fi-name" title="' + item.name + '">' + item.name + '</div>' +
+          '<div class="fi-size">' + fmt(item.file.size) + '</div>' +
+        '</div>' +
+        '<div class="fi-status">' + badge + '</div>';
       fileQueue.appendChild(li);
     });
   }
 
   function updateSizeBar() {
-    const total  = queue.reduce((s, f) => s + f.file.size, 0);
-    const count  = queue.length;
-    const pct    = Math.min((total / MAX_TOTAL) * 100, 100);
-    totalInfo.textContent = `${count} file${count !== 1 ? 's' : ''} · ${fmt(total)} / 25 MB`;
+    var total = queue.reduce(function(s, f) { return s + f.file.size; }, 0);
+    var count = queue.length;
+    var pct   = Math.min((total / MAX_TOTAL) * 100, 100);
+    totalInfo.textContent = count + ' file' + (count !== 1 ? 's' : '') + ' · ' + fmt(total) + ' / 25 MB';
     sizeFill.style.width  = pct + '%';
     sizeFill.className = 'size-fill' + (pct > 90 ? ' full' : pct > 70 ? ' warn' : '');
   }
 
-  // ── Process queue sequentially ──
+  // ── Process queue sequentially via /api/transcribe ──
   async function processQueue() {
     isRunning = true;
-
-    // Load model first if needed
-    const pending = queue.filter(f => f.status === 'queued');
+    var pending = queue.filter(function(f) { return f.status === 'queued'; });
     if (pending.length === 0) { isRunning = false; return; }
 
-    if (!modelReady) {
-      stModel.hidden = false;
-      try {
-        transcriber = await loadModel();
-        modelReady  = true;
-      } catch (err) {
-        stModel.hidden = true;
-        errMsg.textContent = 'Failed to load AI model: ' + (err.message || err);
-        stErr.hidden = false;
-        isRunning = false;
-        return;
-      }
-      stModel.hidden = true;
-    }
+    var t0 = Date.now();
+    var doneCount = 0;
 
-    // Transcribe each queued file in order
-    const t0 = Date.now();
-    let doneCount = 0;
-
-    for (const item of queue.filter(f => f.status === 'queued')) {
+    for (var i = 0; i < pending.length; i++) {
+      var item = pending[i];
       item.status = 'processing';
+      stModel.hidden = false;
+      modelMsg.textContent = 'Transcribing "' + item.name + '"…';
+      modelPct.textContent  = 'Sending to Whisper API — may take up to 30 s';
       renderQueue();
 
       try {
-        const url = URL.createObjectURL(item.file);
-        const res = await transcriber(url, {
-          language: 'english',
-          task: 'transcribe',
-          chunk_length_s: 30,
-          stride_length_s: 5,
-          return_timestamps: false,
+        var res = await fetch('/api/transcribe', {
+          method: 'POST',
+          headers: { 'Content-Type': item.file.type || 'audio/ogg' },
+          body: item.file,
         });
-        URL.revokeObjectURL(url);
-        item.transcript = res.text.trim();
+        if (!res.ok) {
+          var errData = await res.json().catch(function() { return { error: 'Server error ' + res.status }; });
+          throw new Error(errData.error || ('Server error ' + res.status));
+        }
+        var data = await res.json();
+        item.transcript = data.text || '';
         item.status = 'done';
         doneCount++;
       } catch (err) {
         item.status = 'error';
-        item.transcript = `[Error transcribing this file: ${err.message || err}]`;
+        item.transcript = '[Error: ' + (err.message || err) + ']';
       }
 
+      stModel.hidden = true;
       renderQueue();
       updateTranscriptPanel(Date.now() - t0, doneCount);
     }
@@ -548,66 +531,43 @@
 
   // ── Build combined transcript ──
   function buildCombined() {
-    const done = queue.filter(f => f.status === 'done' || f.status === 'error');
+    var done = queue.filter(function(f) { return f.status === 'done' || f.status === 'error'; });
     if (done.length === 0) return '';
     if (done.length === 1) return done[0].transcript;
-
-    return done.map(f =>
-      `──── ${f.name} ────\n${f.transcript}`
-    ).join('\n\n');
+    return done.map(function(f) {
+      return '──── ' + f.name + ' ────\n' + f.transcript;
+    }).join('\n\n');
   }
 
   function updateTranscriptPanel(elapsedMs, doneCount) {
-    const text = buildCombined();
+    var text = buildCombined();
     txOut.value = text;
     txPlaceholder.classList.toggle('hidden', text.length > 0);
 
-    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    var words = text.trim().split(/\s+/).filter(Boolean).length;
     metaWords.textContent = words.toLocaleString() + ' words';
     metaChars.textContent = text.length.toLocaleString() + ' characters';
-    metaTime.textContent  = doneCount > 0 ? `${doneCount} file${doneCount > 1 ? 's' : ''} in ${(elapsedMs / 1000).toFixed(1)}s` : '';
+    metaTime.textContent  = doneCount > 0
+      ? doneCount + ' file' + (doneCount > 1 ? 's' : '') + ' in ' + (elapsedMs / 1000).toFixed(1) + 's'
+      : '';
 
-    const has = text.length > 0;
+    var has = text.length > 0;
     btnCopy.disabled = !has;
     btnDl.disabled   = !has;
     statusDot.classList.toggle('active', has);
   }
 
   // Live word count when user edits
-  txOut.addEventListener('input', () => {
-    const text  = txOut.value;
-    const words = text.trim().split(/\s+/).filter(Boolean).length;
+  txOut.addEventListener('input', function() {
+    var text  = txOut.value;
+    var words = text.trim().split(/\s+/).filter(Boolean).length;
     metaWords.textContent = words.toLocaleString() + ' words';
     metaChars.textContent = text.length.toLocaleString() + ' characters';
-    const has = text.length > 0;
+    var has = text.length > 0;
     btnCopy.disabled = !has;
     btnDl.disabled   = !has;
     statusDot.classList.toggle('active', has);
   });
-
-  // ── Load Whisper model ──
-  async function loadModel() {
-    const { pipeline, env } = await import(
-      'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js'
-    );
-    env.allowLocalModels = false;
-    env.useBrowserCache  = true;
-    return pipeline('automatic-speech-recognition', 'Xenova/whisper-small.en', {
-      progress_callback: d => {
-        if (d.status === 'downloading') {
-          const p = d.progress ? Math.round(d.progress) : 0;
-          modelBar.style.width = p + '%';
-          modelMsg.textContent = `Downloading: ${p}%`;
-          modelPct.textContent = `${(d.loaded / 1e6 || 0).toFixed(1)} MB / ${(d.total / 1e6 || 0).toFixed(1)} MB · cached after this`;
-        } else if (d.status === 'loading') {
-          modelMsg.textContent = 'Initialising…';
-          modelBar.style.width = '95%';
-        } else if (d.status === 'ready') {
-          modelBar.style.width = '100%';
-        }
-      }
-    });
-  }
 
   // ── Helpers ──
   function fmt(bytes) {
@@ -617,31 +577,31 @@
   }
 
   // ── Copy ──
-  btnCopy.addEventListener('click', async () => {
+  btnCopy.addEventListener('click', async function() {
     if (!txOut.value) return;
     try {
       await navigator.clipboard.writeText(txOut.value);
       btnCopy.textContent = 'Copied!';
-      setTimeout(() => {
-        btnCopy.innerHTML = `<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy`;
+      setTimeout(function() {
+        btnCopy.innerHTML = '<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
       }, 2000);
-    } catch {}
+    } catch(e) {}
   });
 
   // ── Download ──
-  btnDl.addEventListener('click', () => {
+  btnDl.addEventListener('click', function() {
     if (!txOut.value) return;
-    const name  = queue.length === 1 ? queue[0].name.replace(/\.[^.]+$/, '') : 'transcripts';
-    const blob  = new Blob([txOut.value], { type: 'text/plain' });
-    const a = Object.assign(document.createElement('a'), {
-      href: URL.createObjectURL(blob), download: name + '.txt'
-    });
+    var name = queue.length === 1 ? queue[0].name.replace(/\.[^.]+$/, '') : 'transcripts';
+    var blob = new Blob([txOut.value], { type: 'text/plain' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name + '.txt';
     a.click();
     URL.revokeObjectURL(a.href);
   });
 
   // ── Retry / clear ──
-  $('errRetry').addEventListener('click', () => {
+  $('errRetry').addEventListener('click', function() {
     queue = [];
     stErr.hidden = true;
     dz.classList.remove('compact');

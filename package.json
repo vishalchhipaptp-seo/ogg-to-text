@@ -1,0 +1,9 @@
+{
+  "name": "ogg-to-text",
+  "version": "1.0.0",
+  "description": "Free OGG audio transcription powered by OpenAI Whisper via HF Inference API",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}
