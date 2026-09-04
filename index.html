@@ -6,7 +6,8 @@
   <title>OGG Transcribe — Free AI Transcription</title>
   <meta name="description" content="Convert OGG audio to text instantly. Powered by OpenAI Whisper via server API. Free, no signup, English only." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@400;500&family=DM+Mono:wght@400&display=swap">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap">
   <style>
     :root {
       --bg:        #F7F5FF;
@@ -50,13 +51,13 @@
     }
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;font-size:15px;line-height:1.6;min-height:100vh;}
+    body{background:var(--bg);color:var(--text);font-family:'Exo 2',system-ui,sans-serif;font-size:15px;line-height:1.6;min-height:100vh;}
 
     /* ── Header ── */
     header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40;}
     .header-inner{max-width:min(80vw,1400px);margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
-    .logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text);text-decoration:none;}
-    .logo-mark{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .logo{display:flex;align-items:center;gap:10px;font-family:'Exo 2',sans-serif;font-weight:700;font-size:17px;color:var(--text);text-decoration:none;}
+    .logo-mark{width:32px;height:32px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .logo-mark svg{width:16px;height:16px;fill:#fff;}
     .badge-private{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-2);font-weight:500;}
     .badge-private svg{width:13px;height:13px;stroke:var(--success);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
@@ -65,7 +66,7 @@
     main{max-width:min(80vw,1400px);margin:0 auto;padding:40px 24px 64px;}
     .hero{margin-bottom:28px;}
     .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
-    h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(26px,4.5vw,38px);line-height:1.12;letter-spacing:-.02em;color:var(--text);text-wrap:balance;margin-bottom:10px;}
+    h1{font-family:'Exo 2',sans-serif;font-weight:800;font-size:clamp(26px,4.5vw,38px);line-height:1.12;letter-spacing:-.02em;color:var(--text);text-wrap:balance;margin-bottom:10px;}
     .sub{color:var(--text-2);font-size:14px;max-width:540px;line-height:1.65;}
     .sub strong{color:var(--text);font-weight:500;}
 
@@ -74,7 +75,7 @@
     @media(max-width:620px){.tool-layout{grid-template-columns:1fr;}}
 
     /* ── Upload card ── */
-    .upload-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+    .upload-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);}
 
     /* Drop zone */
     .drop-zone{padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:12px;cursor:pointer;transition:background 0.18s;border-bottom:1px solid var(--border);}
@@ -82,8 +83,8 @@
     .drop-zone:hover,.drop-zone.over{background:var(--accent-dim);}
     .drop-zone.over{outline:2px solid var(--accent);outline-offset:-2px;}
 
-    .drop-icon{width:50px;height:50px;border-radius:13px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;transition:transform 0.18s;flex-shrink:0;}
-    .drop-zone.compact .drop-icon{width:36px;height:36px;border-radius:9px;}
+    .drop-icon{width:50px;height:50px;border-radius:12px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;transition:transform 0.18s;flex-shrink:0;}
+    .drop-zone.compact .drop-icon{width:36px;height:36px;border-radius:8px;}
     .drop-zone:hover .drop-icon,.drop-zone.over .drop-icon{transform:translateY(-3px);}
     .drop-zone.compact:hover .drop-icon,.drop-zone.compact.over .drop-icon{transform:translateY(-2px);}
     .drop-icon svg{width:22px;height:22px;stroke:var(--accent);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
@@ -91,12 +92,12 @@
 
     .drop-label{text-align:center;}
     .drop-zone.compact .drop-label{text-align:left;}
-    .drop-label strong{display:block;font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:2px;}
+    .drop-label strong{display:block;font-family:'Exo 2',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:2px;}
     .drop-zone.compact .drop-label strong{font-size:13px;margin-bottom:1px;}
     .drop-label span{font-size:12px;color:var(--text-2);}
 
     .drop-meta{display:flex;gap:6px;flex-wrap:wrap;}
-    .chip{font-size:11px;font-family:'DM Mono',monospace;color:var(--text-3);background:var(--accent-dim);padding:3px 8px;border-radius:4px;border:1px solid var(--border);}
+    .chip{font-size:11px;font-family:'Exo 2',sans-serif;color:var(--text-3);background:var(--accent-dim);padding:3px 8px;border-radius:3px;border:1px solid var(--border);}
     .drop-zone.compact .drop-meta{display:none;}
     input[type="file"]{display:none;}
 
@@ -112,12 +113,12 @@
     .file-item.is-processing{background:var(--accent-dim);}
     .file-item.is-done{background:transparent;}
 
-    .fi-icon{width:30px;height:30px;border-radius:7px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .fi-icon{width:30px;height:30px;border-radius:6px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .fi-icon svg{width:14px;height:14px;stroke:var(--accent-2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 
     .fi-info{flex:1;min-width:0;}
     .fi-name{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .fi-size{font-size:11px;color:var(--text-3);font-family:'DM Mono',monospace;}
+    .fi-size{font-size:11px;color:var(--text-3);}
 
     /* Status badges */
     .fi-status{flex-shrink:0;}
@@ -170,16 +171,16 @@
     .err-retry{font-size:12px;color:var(--err);text-decoration:underline;cursor:pointer;margin-top:6px;display:inline-block;}
 
     /* ── Transcript card ── */
-    .transcript-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;}
+    .transcript-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 4px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);}
 
     .panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;flex-wrap:wrap;}
-    .panel-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text);font-family:'Syne',sans-serif;}
+    .panel-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text);font-family:'Exo 2',sans-serif;}
     .panel-title svg{width:14px;height:14px;stroke:var(--text-3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
     .status-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background 0.3s;flex-shrink:0;}
     .status-dot.active{background:var(--success);}
 
     .panel-actions{display:flex;gap:6px;}
-    .btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-family:'DM Sans',sans-serif;font-weight:500;padding:6px 12px;border-radius:7px;border:1px solid transparent;cursor:pointer;transition:background 0.15s,opacity 0.15s;white-space:nowrap;}
+    .btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-family:'Exo 2',sans-serif;font-weight:500;padding:6px 12px;border-radius:5px;border:1px solid transparent;cursor:pointer;transition:background 0.15s,opacity 0.15s;white-space:nowrap;}
     .btn:active{opacity:.8;}
     .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
     .btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
@@ -194,7 +195,7 @@
     .tx-placeholder svg{width:28px;height:28px;stroke:var(--border);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
     .tx-placeholder.hidden{opacity:0;}
 
-    textarea#txOut{width:100%;height:360px;background:transparent;border:none;color:var(--text);font-family:'DM Mono',monospace;font-size:13px;line-height:1.8;padding:18px;resize:vertical;outline:none;display:block;}
+    textarea#txOut{width:100%;height:360px;background:transparent;border:none;color:var(--text);font-family:'Exo 2',sans-serif;font-size:14px;line-height:1.75;padding:18px;resize:vertical;outline:none;display:block;}
     textarea#txOut:focus{background:var(--mono-bg);}
 
     .meta-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 18px;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0;}
@@ -205,7 +206,7 @@
     /* ── Features ── */
     .features{margin-top:24px;display:flex;gap:18px;flex-wrap:wrap;}
     .feat{display:flex;align-items:flex-start;gap:10px;flex:1 1 170px;}
-    .feat-ico{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+    .feat-ico{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
     .feat-ico svg{width:14px;height:14px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
     .feat-ico.green{background:#E6F8F2;}.feat-ico.green svg{stroke:var(--success);}
     .feat-ico.violet{background:var(--accent-dim);}.feat-ico.violet svg{stroke:var(--accent);}
@@ -221,7 +222,7 @@
 
     /* ── FAQ ── */
     .faq{margin-top:32px;}
-    .faq h2{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text);margin-bottom:14px;}
+    .faq h2{font-family:'Exo 2',sans-serif;font-weight:700;font-size:17px;color:var(--text);margin-bottom:14px;}
     details{border-bottom:1px solid var(--border);}
     summary{display:flex;justify-content:space-between;align-items:center;padding:13px 0;cursor:pointer;font-size:14px;font-weight:500;color:var(--text);list-style:none;outline:none;gap:12px;}
     summary::-webkit-details-marker{display:none;}
@@ -252,8 +253,7 @@
   <div class="hero">
     <p class="eyebrow">Free &middot; No account &middot; English</p>
     <h1>Transcribe OGG to Text</h1>
-    <p class="sub">Drop one or more OGG files (total under 25 MB) and get accurate transcripts instantly.
-      <strong>Powered by OpenAI Whisper large-v3</strong> via server API &mdash; no account, no cost.</p>
+    <p class="sub">Drop one or more OGG files and get accurate transcripts instantly &mdash; no account, no cost, total under 25 MB.</p>
   </div>
 
   <div class="tool-layout">
