@@ -230,6 +230,13 @@
     details[open] summary svg{transform:rotate(180deg);}
     .faq-body{font-size:13px;color:var(--text-2);padding:0 0 13px;line-height:1.65;}
 
+    /* ── Mode toggle ── */
+    .mode-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);background:var(--bg);}
+    .mode-label{font-size:11px;color:var(--text-2);font-weight:500;}
+    .mode-toggle{display:flex;background:var(--accent-dim);border-radius:5px;padding:2px;gap:2px;}
+    .mode-btn{font-size:11px;font-family:'Exo 2',sans-serif;font-weight:500;padding:4px 10px;border-radius:3px;border:none;cursor:pointer;color:var(--text-2);background:transparent;transition:all .15s;}
+    .mode-btn.active{background:var(--surface);color:var(--accent);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
     footer{text-align:center;padding:16px 24px 28px;font-size:12px;color:var(--text-3);}
     [hidden]{display:none!important;}
   </style>
@@ -287,7 +294,7 @@
         <div class="size-track"><div class="size-fill" id="sizeFill"></div></div>
       </div>
 
-      <!-- Transcribing indicator -->
+      <!-- Status: transcribing (API) or downloading/transcribing (Browser) -->
       <div class="upload-status" id="stateModel" hidden>
         <div class="loader-row">
           <div class="spin"></div>
@@ -296,6 +303,8 @@
             <span id="modelPct">Sending audio to Whisper API</span>
           </div>
         </div>
+        <div class="track" id="modelTrack" hidden><div class="fill" id="modelBar"></div></div>
+        <p class="track-note" id="modelNote" hidden></p>
       </div>
 
       <!-- Error -->
@@ -305,6 +314,15 @@
           <p class="err-title">Error</p>
           <p class="err-msg" id="errMsg">Something went wrong.</p>
           <span class="err-retry" id="errRetry">Clear &amp; retry</span>
+        </div>
+      </div>
+
+      <!-- Mode toggle -->
+      <div class="mode-bar">
+        <span class="mode-label">Engine</span>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="modeApi">API &mdash; cloud</button>
+          <button class="mode-btn" id="modeBrowser">Browser &mdash; offline</button>
         </div>
       </div>
     </div>
@@ -364,8 +382,8 @@
 
   <div class="faq">
     <h2>Questions</h2>
-    <details><summary>Where is my audio processed?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">Your OGG file is sent to a serverless API that calls the Hugging Face Inference API (Whisper large-v3) or AssemblyAI as a fallback. Neither service stores your audio after transcription. No audio is ever retained by this tool.</p></details>
-    <details><summary>Why does it sometimes take 20-30 seconds?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">If the Hugging Face model is cold (no recent use), it needs ~20 seconds to wake up. After that first request, responses are fast. AssemblyAI (the fallback) adds an upload step but is usually quicker for longer files.</p></details>
+    <details><summary>What is the difference between API and Browser mode?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body"><strong>API mode</strong> (default): your audio is sent to a server that runs Whisper large-v3 via Hugging Face, then AssemblyAI as a fallback. No model download needed — just upload and go. <strong>Browser mode</strong>: Whisper small runs entirely in your browser via WebAssembly. First use downloads ~97 MB which is then cached permanently. After that, transcription is instant, works offline, and nothing leaves your device.</p></details>
+    <details><summary>Why does API mode sometimes take 20-30 seconds?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">If the Hugging Face model is cold (no recent use), it needs ~20 seconds to wake up. After that first request, responses are fast. Switch to Browser mode if you want consistently fast results after the one-time model download.</p></details>
     <details><summary>Can I transcribe multiple files?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">Yes. Select or drop multiple OGG files at once (total under 25 MB). They are processed one by one and all transcripts appear in the panel, separated by file name headers.</p></details>
     <details><summary>How accurate is it?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">Whisper large-v3 achieves under 5% word error rate on clear English speech. You can edit the result directly in the transcript panel before copying or downloading.</p></details>
   </div>
@@ -373,10 +391,10 @@
 
 <footer>Built with OpenAI Whisper large-v3 &middot; Hosted free on Vercel &middot; No account required</footer>
 
-<script>
+<script type="module">
   const $ = id => document.getElementById(id);
 
-  // DOM
+  // ── DOM refs ──
   const dz         = $('dropZone');
   const fi         = $('fileInput');
   const fileQueue  = $('fileQueue');
@@ -386,6 +404,9 @@
   const stModel    = $('stateModel');
   const modelMsg   = $('modelMsg');
   const modelPct   = $('modelPct');
+  const modelTrack = $('modelTrack');
+  const modelBar   = $('modelBar');
+  const modelNote  = $('modelNote');
   const stErr      = $('stateErr');
   const errMsg     = $('errMsg');
   const txOut      = $('txOut');
@@ -396,16 +417,38 @@
   const metaWords  = $('metaWords');
   const metaChars  = $('metaChars');
   const metaTime   = $('metaTime');
+  const btnModeApi     = $('modeApi');
+  const btnModeBrowser = $('modeBrowser');
 
-  const MAX_TOTAL  = 25 * 1024 * 1024; // 25 MB — no minimum, even a few seconds works
-  let queue        = [];   // {id, file, name, status, transcript}
-  let isRunning    = false;
+  const MAX_TOTAL = 25 * 1024 * 1024; // 25 MB — no minimum
+  let queue     = [];
+  let isRunning = false;
+
+  // ── Engine mode (persisted) ──
+  // 'api'     = server-side HF/AssemblyAI (cloud, always works)
+  // 'browser' = @xenova/transformers Whisper small (~97 MB, cached in browser)
+  let currentMode = localStorage.getItem('txMode') || 'api';
+  let browserTranscriber = null; // lazy-loaded when browser mode first used
+
+  function applyMode(mode) {
+    currentMode = mode;
+    try { localStorage.setItem('txMode', mode); } catch(e) {}
+    btnModeApi.classList.toggle('active', mode === 'api');
+    btnModeBrowser.classList.toggle('active', mode === 'browser');
+  }
+  applyMode(currentMode);
+
+  btnModeApi.addEventListener('click', function() { applyMode('api'); });
+  btnModeBrowser.addEventListener('click', function() {
+    if (currentMode === 'browser') return;
+    applyMode('browser');
+  });
 
   // ── Drag & drop ──
   dz.addEventListener('click',  () => fi.click());
   dz.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fi.click(); });
   dz.addEventListener('dragover',  e => { e.preventDefault(); dz.classList.add('over'); });
-  dz.addEventListener('dragleave', ()  => dz.classList.remove('over'));
+  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
   dz.addEventListener('drop', e => {
     e.preventDefault(); dz.classList.remove('over');
     addFiles(Array.from(e.dataTransfer.files));
@@ -415,105 +458,162 @@
     fi.value = '';
   });
 
-  // ── Add files to queue ──
+  // ── Add files ──
   function addFiles(files) {
     stErr.hidden = true;
-
     const totalBefore = queue.reduce((s, f) => s + f.file.size, 0);
     const incoming    = files.reduce((s, f) => s + f.size, 0);
-
     if (totalBefore + incoming > MAX_TOTAL) {
       errMsg.textContent = 'Total size would exceed 25 MB. Current: ' + fmt(totalBefore) + ', adding: ' + fmt(incoming) + '.';
       stErr.hidden = false;
       return;
     }
-
-    files.forEach(function(file) {
-      var id = Math.random().toString(36).slice(2);
-      queue.push({ id: id, file: file, name: file.name, status: 'queued', transcript: '' });
+    files.forEach(file => {
+      const id = Math.random().toString(36).slice(2);
+      queue.push({ id, file, name: file.name, status: 'queued', transcript: '' });
     });
-
     renderQueue();
     updateSizeBar();
     if (!isRunning) processQueue();
   }
 
-  // ── Render file queue list ──
+  // ── Render queue ──
   function renderQueue() {
     fileQueue.innerHTML = '';
     if (queue.length === 0) { totalBar.hidden = true; return; }
-
     totalBar.hidden = false;
     dz.classList.add('compact');
-
-    queue.forEach(function(item) {
-      var li = document.createElement('li');
+    queue.forEach(item => {
+      const li = document.createElement('li');
       li.className = 'file-item' + (item.status === 'processing' ? ' is-processing' : '');
       li.dataset.id = item.id;
-
-      var iconSvg = item.status === 'done'
+      const iconSvg = item.status === 'done'
         ? '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--success);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><polyline points="20 6 9 17 4 12"/></svg>'
         : item.status === 'error'
         ? '<svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:var(--err);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>'
         : '<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
-
-      var iconBg = item.status === 'done' ? 'background:var(--success-dim)' : item.status === 'error' ? 'background:var(--err-dim)' : '';
-
-      var badge = '';
+      const iconBg = item.status === 'done' ? 'background:var(--success-dim)' : item.status === 'error' ? 'background:var(--err-dim)' : '';
+      let badge = '';
       if (item.status === 'queued')     badge = '<span class="badge badge-queued">Queued</span>';
       if (item.status === 'processing') badge = '<span class="badge badge-processing"><span class="mini-wave"><span class="mw"></span><span class="mw"></span><span class="mw"></span></span>Processing</span>';
       if (item.status === 'done')       badge = '<span class="badge badge-done">Done</span>';
       if (item.status === 'error')      badge = '<span class="badge badge-error">Error</span>';
-
       li.innerHTML =
         '<div class="fi-icon" style="' + iconBg + '">' + iconSvg + '</div>' +
-        '<div class="fi-info">' +
-          '<div class="fi-name" title="' + item.name + '">' + item.name + '</div>' +
-          '<div class="fi-size">' + fmt(item.file.size) + '</div>' +
-        '</div>' +
+        '<div class="fi-info"><div class="fi-name" title="' + item.name + '">' + item.name + '</div>' +
+        '<div class="fi-size">' + fmt(item.file.size) + '</div></div>' +
         '<div class="fi-status">' + badge + '</div>';
       fileQueue.appendChild(li);
     });
   }
 
   function updateSizeBar() {
-    var total = queue.reduce(function(s, f) { return s + f.file.size; }, 0);
-    var count = queue.length;
-    var pct   = Math.min((total / MAX_TOTAL) * 100, 100);
+    const total = queue.reduce((s, f) => s + f.file.size, 0);
+    const count = queue.length;
+    const pct   = Math.min((total / MAX_TOTAL) * 100, 100);
     totalInfo.textContent = count + ' file' + (count !== 1 ? 's' : '') + ' · ' + fmt(total) + ' / 25 MB';
     sizeFill.style.width  = pct + '%';
     sizeFill.className = 'size-fill' + (pct > 90 ? ' full' : pct > 70 ? ' warn' : '');
   }
 
-  // ── Process queue sequentially via /api/transcribe ──
+  // ── Load browser Whisper model (lazy, cached) ──
+  async function loadBrowserModel() {
+    if (browserTranscriber) return browserTranscriber;
+
+    modelTrack.hidden = false;
+    modelNote.hidden  = false;
+    modelBar.style.width = '0%';
+    modelNote.textContent = '~97 MB · downloading once, cached forever in this browser';
+
+    const { pipeline, env } = await import(
+      'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js'
+    );
+    env.allowLocalModels = false;
+    env.useBrowserCache  = true;
+
+    browserTranscriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-small.en', {
+      progress_callback: d => {
+        if (d.status === 'downloading') {
+          const p = d.progress ? Math.round(d.progress) : 0;
+          modelBar.style.width = p + '%';
+          modelMsg.textContent = 'Downloading model: ' + p + '%';
+          modelPct.textContent = fmt(d.loaded || 0) + ' / ' + fmt(d.total || 0);
+        } else if (d.status === 'loading') {
+          modelMsg.textContent = 'Initialising model…';
+          modelBar.style.width = '95%';
+        } else if (d.status === 'ready') {
+          modelBar.style.width = '100%';
+        }
+      }
+    });
+
+    modelTrack.hidden = true;
+    modelNote.hidden  = true;
+    return browserTranscriber;
+  }
+
+  // ── Transcribe one file via API ──
+  async function transcribeAPI(item) {
+    modelMsg.textContent = 'Transcribing "' + item.name + '"…';
+    modelPct.textContent  = 'Sending to Whisper API — may take up to 30 s';
+    modelTrack.hidden = true;
+    modelNote.hidden  = true;
+
+    const res = await fetch('/api/transcribe', {
+      method: 'POST',
+      headers: { 'Content-Type': item.file.type || 'audio/ogg' },
+      body: item.file,
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({ error: 'Server error ' + res.status }));
+      throw new Error(errData.error || ('Server error ' + res.status));
+    }
+    const data = await res.json();
+    return data.text || '';
+  }
+
+  // ── Transcribe one file in browser (Whisper small) ──
+  async function transcribeBrowser(item) {
+    modelMsg.textContent = 'Loading model…';
+    modelPct.textContent  = 'First time only — cached after this';
+
+    const transcriber = await loadBrowserModel();
+
+    modelMsg.textContent = 'Transcribing "' + item.name + '"…';
+    modelPct.textContent  = 'Running Whisper locally in your browser';
+    modelTrack.hidden = true;
+    modelNote.hidden  = true;
+
+    const url = URL.createObjectURL(item.file);
+    const res = await transcriber(url, {
+      language: 'english',
+      task: 'transcribe',
+      chunk_length_s: 30,
+      stride_length_s: 5,
+      return_timestamps: false,
+    });
+    URL.revokeObjectURL(url);
+    return res.text.trim();
+  }
+
+  // ── Process queue ──
   async function processQueue() {
     isRunning = true;
-    var pending = queue.filter(function(f) { return f.status === 'queued'; });
+    const pending = queue.filter(f => f.status === 'queued');
     if (pending.length === 0) { isRunning = false; return; }
 
-    var t0 = Date.now();
-    var doneCount = 0;
+    const t0 = Date.now();
+    let doneCount = 0;
 
-    for (var i = 0; i < pending.length; i++) {
-      var item = pending[i];
+    for (const item of pending) {
       item.status = 'processing';
       stModel.hidden = false;
-      modelMsg.textContent = 'Transcribing "' + item.name + '"…';
-      modelPct.textContent  = 'Sending to Whisper API — may take up to 30 s';
       renderQueue();
 
       try {
-        var res = await fetch('/api/transcribe', {
-          method: 'POST',
-          headers: { 'Content-Type': item.file.type || 'audio/ogg' },
-          body: item.file,
-        });
-        if (!res.ok) {
-          var errData = await res.json().catch(function() { return { error: 'Server error ' + res.status }; });
-          throw new Error(errData.error || ('Server error ' + res.status));
-        }
-        var data = await res.json();
-        item.transcript = data.text || '';
+        item.transcript = currentMode === 'browser'
+          ? await transcribeBrowser(item)
+          : await transcribeAPI(item);
         item.status = 'done';
         doneCount++;
       } catch (err) {
@@ -529,39 +629,35 @@
     isRunning = false;
   }
 
-  // ── Build combined transcript ──
+  // ── Combined transcript ──
   function buildCombined() {
-    var done = queue.filter(function(f) { return f.status === 'done' || f.status === 'error'; });
+    const done = queue.filter(f => f.status === 'done' || f.status === 'error');
     if (done.length === 0) return '';
     if (done.length === 1) return done[0].transcript;
-    return done.map(function(f) {
-      return '──── ' + f.name + ' ────\n' + f.transcript;
-    }).join('\n\n');
+    return done.map(f => '──── ' + f.name + ' ────\n' + f.transcript).join('\n\n');
   }
 
   function updateTranscriptPanel(elapsedMs, doneCount) {
-    var text = buildCombined();
+    const text = buildCombined();
     txOut.value = text;
     txPlaceholder.classList.toggle('hidden', text.length > 0);
-
-    var words = text.trim().split(/\s+/).filter(Boolean).length;
+    const has   = text.length > 0;
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
     metaWords.textContent = has ? words.toLocaleString() + ' words' : '';
     metaChars.textContent = has ? text.length.toLocaleString() + ' characters' : '';
     metaTime.textContent  = doneCount > 0
       ? doneCount + ' file' + (doneCount > 1 ? 's' : '') + ' in ' + (elapsedMs / 1000).toFixed(1) + 's'
       : '';
-
-    var has = text.length > 0;
     btnCopy.disabled = !has;
     btnDl.disabled   = !has;
     statusDot.classList.toggle('active', has);
   }
 
-  // Live word count when user edits
-  txOut.addEventListener('input', function() {
-    var text  = txOut.value;
-    var has   = text.length > 0;
-    var words = text.trim().split(/\s+/).filter(Boolean).length;
+  // Live word count
+  txOut.addEventListener('input', () => {
+    const text = txOut.value;
+    const has  = text.length > 0;
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
     metaWords.textContent = has ? words.toLocaleString() + ' words' : '';
     metaChars.textContent = has ? text.length.toLocaleString() + ' characters' : '';
     btnCopy.disabled = !has;
@@ -577,31 +673,31 @@
   }
 
   // ── Copy ──
-  btnCopy.addEventListener('click', async function() {
+  btnCopy.addEventListener('click', async () => {
     if (!txOut.value) return;
     try {
       await navigator.clipboard.writeText(txOut.value);
       btnCopy.textContent = 'Copied!';
-      setTimeout(function() {
+      setTimeout(() => {
         btnCopy.innerHTML = '<svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy';
       }, 2000);
     } catch(e) {}
   });
 
   // ── Download ──
-  btnDl.addEventListener('click', function() {
+  btnDl.addEventListener('click', () => {
     if (!txOut.value) return;
-    var name = queue.length === 1 ? queue[0].name.replace(/\.[^.]+$/, '') : 'transcripts';
-    var blob = new Blob([txOut.value], { type: 'text/plain' });
-    var a = document.createElement('a');
+    const name = queue.length === 1 ? queue[0].name.replace(/\.[^.]+$/, '') : 'transcripts';
+    const blob = new Blob([txOut.value], { type: 'text/plain' });
+    const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = name + '.txt';
     a.click();
     URL.revokeObjectURL(a.href);
   });
 
-  // ── Retry / clear ──
-  $('errRetry').addEventListener('click', function() {
+  // ── Clear / retry ──
+  $('errRetry').addEventListener('click', () => {
     queue = [];
     stErr.hidden = true;
     dz.classList.remove('compact');
