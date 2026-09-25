@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OGG Transcribe — Free AI Transcription</title>
   <meta name="description" content="Convert OGG audio to text instantly. Free, no signup, no account required. English only." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap">
   <style>
     :root {
       --bg:        #F7F5FF;
@@ -51,12 +48,12 @@
     }
 
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{background:var(--bg);color:var(--text);font-family:'Exo 2',system-ui,sans-serif;font-size:15px;line-height:1.6;min-height:100vh;}
+    body{background:var(--bg);color:var(--text);font-family:Verdana,Geneva,sans-serif;font-size:14px;line-height:1.65;min-height:100vh;}
 
     /* ── Header ── */
     header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40;}
     .header-inner{max-width:min(80vw,1400px);margin:0 auto;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;}
-    .logo{display:flex;align-items:center;gap:10px;font-family:'Exo 2',sans-serif;font-weight:700;font-size:17px;color:var(--text);text-decoration:none;}
+    .logo{display:flex;align-items:center;gap:10px;font-family:Verdana,Geneva,sans-serif;font-weight:700;font-size:17px;color:var(--text);text-decoration:none;}
     .logo-mark{width:32px;height:32px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
     .logo-mark svg{width:16px;height:16px;fill:#fff;}
     .badge-private{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-2);font-weight:500;}
@@ -66,7 +63,7 @@
     main{max-width:min(80vw,1400px);margin:0 auto;padding:40px 24px 64px;}
     .hero{margin-bottom:28px;}
     .eyebrow{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:10px;}
-    h1{font-family:'Exo 2',sans-serif;font-weight:800;font-size:clamp(26px,4.5vw,38px);line-height:1.12;letter-spacing:-.02em;color:var(--text);text-wrap:balance;margin-bottom:10px;}
+    h1{font-family:Verdana,Geneva,sans-serif;font-weight:800;font-size:clamp(26px,4.5vw,38px);line-height:1.12;letter-spacing:-.02em;color:var(--text);text-wrap:balance;margin-bottom:10px;}
     .sub{color:var(--text-2);font-size:14px;max-width:540px;line-height:1.65;}
     .sub strong{color:var(--text);font-weight:500;}
 
@@ -92,12 +89,12 @@
 
     .drop-label{text-align:center;}
     .drop-zone.compact .drop-label{text-align:left;}
-    .drop-label strong{display:block;font-family:'Exo 2',sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:2px;}
+    .drop-label strong{display:block;font-family:Verdana,Geneva,sans-serif;font-weight:700;font-size:15px;color:var(--text);margin-bottom:2px;}
     .drop-zone.compact .drop-label strong{font-size:13px;margin-bottom:1px;}
     .drop-label span{font-size:12px;color:var(--text-2);}
 
     .drop-meta{display:flex;gap:6px;flex-wrap:wrap;}
-    .chip{font-size:11px;font-family:'Exo 2',sans-serif;color:var(--text-3);background:var(--accent-dim);padding:3px 8px;border-radius:3px;border:1px solid var(--border);}
+    .chip{font-size:11px;font-family:Verdana,Geneva,sans-serif;color:var(--text-3);background:var(--accent-dim);padding:3px 8px;border-radius:3px;border:1px solid var(--border);}
     .drop-zone.compact .drop-meta{display:none;}
     input[type="file"]{display:none;}
 
@@ -174,13 +171,13 @@
     .transcript-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 4px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);}
 
     .panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;gap:8px;flex-wrap:wrap;}
-    .panel-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text);font-family:'Exo 2',sans-serif;}
+    .panel-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text);font-family:Verdana,Geneva,sans-serif;}
     .panel-title svg{width:14px;height:14px;stroke:var(--text-3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
     .status-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background 0.3s;flex-shrink:0;}
     .status-dot.active{background:var(--success);}
 
     .panel-actions{display:flex;gap:6px;}
-    .btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-family:'Exo 2',sans-serif;font-weight:500;padding:6px 12px;border-radius:5px;border:1px solid transparent;cursor:pointer;transition:background 0.15s,opacity 0.15s;white-space:nowrap;}
+    .btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-family:Verdana,Geneva,sans-serif;font-weight:500;padding:6px 12px;border-radius:5px;border:1px solid transparent;cursor:pointer;transition:background 0.15s,opacity 0.15s;white-space:nowrap;}
     .btn:active{opacity:.8;}
     .btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
     .btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
@@ -195,7 +192,7 @@
     .tx-placeholder svg{width:28px;height:28px;stroke:var(--border);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;}
     .tx-placeholder.hidden{opacity:0;}
 
-    textarea#txOut{width:100%;height:360px;background:transparent;border:none;color:var(--text);font-family:'Exo 2',sans-serif;font-size:14px;line-height:1.75;padding:18px;resize:vertical;outline:none;display:block;}
+    textarea#txOut{width:100%;height:360px;background:transparent;border:none;color:var(--text);font-family:Verdana,Geneva,sans-serif;font-size:14px;line-height:1.75;padding:18px;resize:vertical;outline:none;display:block;}
     textarea#txOut:focus{background:var(--mono-bg);}
 
     .meta-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 18px;border-top:1px solid var(--border);background:var(--bg);flex-shrink:0;}
@@ -222,7 +219,7 @@
 
     /* ── FAQ ── */
     .faq{margin-top:32px;}
-    .faq h2{font-family:'Exo 2',sans-serif;font-weight:700;font-size:17px;color:var(--text);margin-bottom:14px;}
+    .faq h2{font-family:Verdana,Geneva,sans-serif;font-weight:700;font-size:17px;color:var(--text);margin-bottom:14px;}
     details{border-bottom:1px solid var(--border);}
     summary{display:flex;justify-content:space-between;align-items:center;padding:13px 0;cursor:pointer;font-size:14px;font-weight:500;color:var(--text);list-style:none;outline:none;gap:12px;}
     summary::-webkit-details-marker{display:none;}
@@ -234,7 +231,7 @@
     .mode-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);background:var(--bg);}
     .mode-label{font-size:11px;color:var(--text-2);font-weight:500;}
     .mode-toggle{display:flex;background:var(--accent-dim);border-radius:5px;padding:2px;gap:2px;}
-    .mode-btn{font-size:11px;font-family:'Exo 2',sans-serif;font-weight:500;padding:4px 10px;border-radius:3px;border:none;cursor:pointer;color:var(--text-2);background:transparent;transition:all .15s;}
+    .mode-btn{font-size:11px;font-family:Verdana,Geneva,sans-serif;font-weight:500;padding:4px 10px;border-radius:3px;border:none;cursor:pointer;color:var(--text-2);background:transparent;transition:all .15s;}
     .mode-btn.active{background:var(--surface);color:var(--accent);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.08);}
 
     footer{text-align:center;padding:16px 24px 28px;font-size:12px;color:var(--text-3);}
