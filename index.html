@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>OGG Transcribe — Free AI Transcription</title>
-  <meta name="description" content="Convert OGG audio to text instantly. Powered by OpenAI Whisper via server API. Free, no signup, English only." />
+  <meta name="description" content="Convert OGG audio to text instantly. Free, no signup, no account required. English only." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap">
@@ -300,7 +300,7 @@
           <div class="spin"></div>
           <div class="loader-text">
             <strong id="modelMsg">Transcribing&hellip;</strong>
-            <span id="modelPct">Sending audio to Whisper API</span>
+            <span id="modelPct">Processing your audio&hellip;</span>
           </div>
         </div>
         <div class="track" id="modelTrack" hidden><div class="fill" id="modelBar"></div></div>
@@ -372,20 +372,20 @@
     </div>
     <div class="feat">
       <div class="feat-ico violet"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg></div>
-      <div class="feat-text"><strong>Whisper large-v3</strong><span>OpenAI's best speech model. Under 5% word error rate on clear English.</span></div>
+      <div class="feat-text"><strong>High Accuracy</strong><span>State-of-the-art AI speech model. Under 5% word error rate on clear English.</span></div>
     </div>
     <div class="feat">
       <div class="feat-ico blue"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-      <div class="feat-text"><strong>Always Free</strong><span>Hosted on Vercel's free tier. No rate limits for normal use.</span></div>
+      <div class="feat-text"><strong>Always Free</strong><span>No rate limits, no hidden costs. Works on any device, any browser.</span></div>
     </div>
   </div>
 
   <div class="faq">
     <h2>Questions</h2>
-    <details><summary>What is the difference between API and Browser mode?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body"><strong>API mode</strong> (default): your audio is sent to a server that runs Whisper large-v3 via Hugging Face, then AssemblyAI as a fallback. No model download needed — just upload and go. <strong>Browser mode</strong>: Whisper small runs entirely in your browser via WebAssembly. First use downloads ~97 MB which is then cached permanently. After that, transcription is instant, works offline, and nothing leaves your device.</p></details>
-    <details><summary>Why does API mode sometimes take 20-30 seconds?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">If the Hugging Face model is cold (no recent use), it needs ~20 seconds to wake up. After that first request, responses are fast. Switch to Browser mode if you want consistently fast results after the one-time model download.</p></details>
+    <details><summary>What is the difference between API and Browser mode?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body"><strong>API mode</strong> (default): your audio is sent to a secure server for processing. No setup needed — just upload and get your transcript. <strong>Browser mode</strong>: the AI model runs entirely inside your browser. First use downloads the model (~97 MB) which is then cached permanently — after that, transcription works offline and nothing ever leaves your device.</p></details>
+    <details><summary>Why does API mode sometimes take 20-30 seconds?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">The server may need a moment to warm up if it hasn't been used recently. After that first request, responses are fast. Switch to Browser mode for consistently instant results once the one-time model download is done.</p></details>
     <details><summary>Can I transcribe multiple files?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">Yes. Select or drop multiple OGG files at once (total under 25 MB). They are processed one by one and all transcripts appear in the panel, separated by file name headers.</p></details>
-    <details><summary>How accurate is it?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">Whisper large-v3 achieves under 5% word error rate on clear English speech. You can edit the result directly in the transcript panel before copying or downloading.</p></details>
+    <details><summary>How accurate is it?<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></summary><p class="faq-body">The AI model achieves under 5% word error rate on clear English speech. You can edit the result directly in the transcript panel before copying or downloading.</p></details>
   </div>
 </main>
 
@@ -523,7 +523,7 @@
     modelTrack.hidden = false;
     modelNote.hidden  = false;
     modelBar.style.width = '0%';
-    modelNote.textContent = '~97 MB · downloading once, cached forever in this browser';
+    modelNote.textContent = '~97 MB · one-time download, cached forever in this browser';
 
     const { pipeline, env } = await import(
       'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js'
@@ -555,7 +555,7 @@
   // ── Transcribe one file via API ──
   async function transcribeAPI(item) {
     modelMsg.textContent = 'Transcribing "' + item.name + '"…';
-    modelPct.textContent  = 'Sending to Whisper API — may take up to 30 s';
+    modelPct.textContent  = 'Sending to server — may take up to 30 s';
     modelTrack.hidden = true;
     modelNote.hidden  = true;
 
@@ -580,7 +580,7 @@
     const transcriber = await loadBrowserModel();
 
     modelMsg.textContent = 'Transcribing "' + item.name + '"…';
-    modelPct.textContent  = 'Running Whisper locally in your browser';
+    modelPct.textContent  = 'Running locally in your browser';
     modelTrack.hidden = true;
     modelNote.hidden  = true;
 
