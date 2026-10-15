@@ -53,6 +53,9 @@ async function groqTranscribe(buf, contentType, token) {
     `${CRLF}--${boundary}${CRLF}` +
     `Content-Disposition: form-data; name="response_format"${CRLF}${CRLF}` +
     `json` +
+    `${CRLF}--${boundary}${CRLF}` +
+    `Content-Disposition: form-data; name="task"${CRLF}${CRLF}` +
+    `transcribe` +
     `${CRLF}--${boundary}--${CRLF}`;
 
   const body = Buffer.concat([
