@@ -81,7 +81,7 @@ async function aaiTranscribe(buf, key, deadline) {
   const tx = await fetch('https://api.assemblyai.com/v2/transcript', {
     method: 'POST',
     headers: { authorization: key, 'content-type': 'application/json' },
-    body: JSON.stringify({ audio_url: upload_url, language_code: 'en_us' }),
+    body: JSON.stringify({ audio_url: upload_url }),
     signal: AbortSignal.timeout(10_000),
   });
   if (!tx.ok) throw new Error(`AAI transcript request failed: ${tx.status}`);
