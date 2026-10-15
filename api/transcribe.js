@@ -171,11 +171,15 @@ async function aaiTranscribe(buf, key, deadline) {
   if (!up.ok) throw new Error(`AAI upload failed: ${up.status}`);
   const { upload_url } = await up.json();
 
-  // 2. Request transcript
+  // 2. Request transcript — Universal-2 model with Hindi + code-switching support
   const tx = await fetch('https://api.assemblyai.com/v2/transcript', {
     method: 'POST',
     headers: { authorization: key, 'content-type': 'application/json' },
-    body: JSON.stringify({ audio_url: upload_url }),
+    body: JSON.stringify({
+      audio_url: upload_url,
+      speech_model: 'best',       // Universal-2: handles Hindi/English code-switching
+      language_code: 'hi',        // primary language; English code-switches stay Latin
+    }),
     signal: AbortSignal.timeout(10_000),
   });
   if (!tx.ok) throw new Error(`AAI transcript request failed: ${tx.status}`);
@@ -218,7 +222,17 @@ module.exports = async function handler(req, res) {
   // Shared deadline: 55 s from now, leaving 5 s margin before Vercel's 60 s cut-off
   const deadline = Date.now() + TOTAL_BUDGET;
 
-  // 1. Try Sarvam — best for Hindi/English code-switching (saarika:v2)
+  // 1. AssemblyAI — Universal-2 with Hindi language code handles Hinglish code-switching
+  if (aaiKey) {
+    try {
+      const text = await aaiTranscribe(buf, aaiKey, deadline);
+      return res.json({ text, provider: 'assemblyai' });
+    } catch (err) {
+      console.error('[AAI] failed, trying Sarvam:', err.message);
+    }
+  }
+
+  // 2. Sarvam — saarika:v2, purpose-built for Indic languages
   if (sarvamKey) {
     try {
       const text = await sarvamTranscribe(buf, contentType, sarvamKey);
@@ -228,7 +242,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // 2. Try Groq
+  // 3. Groq
   if (groqToken) {
     try {
       const text = await groqTranscribe(buf, contentType, groqToken);
@@ -238,22 +252,12 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // 3. Try HF — give it at most 25 s so AAI always has a fair slice
+  // 4. HF — give it the remaining budget
   if (hfToken) {
     const hfDeadline = Math.min(deadline, Date.now() + 25_000);
     try {
       const text = await hfTranscribe(buf, contentType, hfToken, hfDeadline);
       return res.json({ text, provider: 'huggingface' });
-    } catch (err) {
-      console.error('[HF] failed, trying AssemblyAI:', err.message);
-    }
-  }
-
-  // 4. Fall back to AssemblyAI
-  if (aaiKey) {
-    try {
-      const text = await aaiTranscribe(buf, aaiKey, deadline);
-      return res.json({ text, provider: 'assemblyai' });
     } catch (err) {
       return res.status(500).json({ error: err.message });
     }
