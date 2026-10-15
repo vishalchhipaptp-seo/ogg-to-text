@@ -171,15 +171,11 @@ async function aaiTranscribe(buf, key, deadline) {
   if (!up.ok) throw new Error(`AAI upload failed: ${up.status}`);
   const { upload_url } = await up.json();
 
-  // 2. Request transcript — Universal-2 model with Hindi + code-switching support
+  // 2. Request transcript — Hindi language; AAI keeps English code-switches in Latin
   const tx = await fetch('https://api.assemblyai.com/v2/transcript', {
     method: 'POST',
     headers: { authorization: key, 'content-type': 'application/json' },
-    body: JSON.stringify({
-      audio_url: upload_url,
-      speech_model: 'best',       // Universal-2: handles Hindi/English code-switching
-      language_code: 'hi',        // primary language; English code-switches stay Latin
-    }),
+    body: JSON.stringify({ audio_url: upload_url, language_code: 'hi' }),
     signal: AbortSignal.timeout(10_000),
   });
   if (!tx.ok) throw new Error(`AAI transcript request failed: ${tx.status}`);
@@ -232,8 +228,10 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  const remaining = () => deadline - Date.now();
+
   // 2. Sarvam — saarika:v2, purpose-built for Indic languages
-  if (sarvamKey) {
+  if (sarvamKey && remaining() > 5_000) {
     try {
       const text = await sarvamTranscribe(buf, contentType, sarvamKey);
       return res.json({ text, provider: 'sarvam' });
@@ -243,7 +241,7 @@ module.exports = async function handler(req, res) {
   }
 
   // 3. Groq
-  if (groqToken) {
+  if (groqToken && remaining() > 5_000) {
     try {
       const text = await groqTranscribe(buf, contentType, groqToken);
       return res.json({ text, provider: 'groq' });
@@ -252,19 +250,19 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // 4. HF — give it the remaining budget
-  if (hfToken) {
-    const hfDeadline = Math.min(deadline, Date.now() + 25_000);
+  // 4. HF
+  if (hfToken && remaining() > 5_000) {
+    const hfDeadline = Math.min(deadline, Date.now() + 20_000);
     try {
       const text = await hfTranscribe(buf, contentType, hfToken, hfDeadline);
       return res.json({ text, provider: 'huggingface' });
     } catch (err) {
-      return res.status(500).json({ error: err.message });
+      console.error('[HF] failed:', err.message);
     }
   }
 
   return res.status(500).json({
-    error: 'No API keys configured. Add SARVAM_KEY, GROQ_TOKEN, HF_TOKEN, or ASSEMBLYAI_KEY in Vercel → Settings → Environment Variables.',
+    error: 'All transcription providers failed or timed out. Try again.',
   });
 };
 
