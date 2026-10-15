@@ -4,11 +4,13 @@
  * Header: Content-Type: audio/ogg (or audio/mpeg etc.)
  *
  * Strategy (first key that succeeds wins):
- *  1. Groq   — fastest, handles Hindi/English code-switching correctly
- *  2. HF     — Hugging Face Inference API (Whisper large-v3-turbo)
- *  3. AAI    — AssemblyAI fallback
+ *  1. Sarvam — saarika:v2, built for Hinglish (Hindi+English code-switching)
+ *  2. Groq   — whisper-large-v3, fast fallback
+ *  3. HF     — Hugging Face Inference API (whisper-large-v3)
+ *  4. AAI    — AssemblyAI final fallback
  *
  * Env vars (set in Vercel dashboard → Settings → Environment Variables):
+ *  SARVAM_KEY     — Sarvam AI key (free at app.sarvam.ai)
  *  GROQ_TOKEN     — Groq API key (free at console.groq.com)
  *  HF_TOKEN       — Hugging Face token (free at huggingface.co/settings/tokens)
  *  ASSEMBLYAI_KEY — AssemblyAI API key (free at assemblyai.com)
@@ -30,6 +32,49 @@ function readBody(req) {
     req.on('end',   () => resolve(Buffer.concat(chunks)));
     req.on('error', reject);
   });
+}
+
+// ── Sarvam AI (saarika:v2) ────────────────────────────────────────────────────
+// Designed for Indic languages; handles Hindi/English code-switching natively —
+// Hindi words stay Devanagari, English words stay Latin.
+async function sarvamTranscribe(buf, contentType, key) {
+  const ext = contentType.split('/')[1]?.split(';')[0] || 'ogg';
+  const boundary = '----FormBoundary' + Math.random().toString(36).slice(2);
+  const CRLF = '\r\n';
+
+  const header =
+    `--${boundary}${CRLF}` +
+    `Content-Disposition: form-data; name="file"; filename="audio.${ext}"${CRLF}` +
+    `Content-Type: ${contentType}${CRLF}${CRLF}`;
+  const tail =
+    `${CRLF}--${boundary}${CRLF}` +
+    `Content-Disposition: form-data; name="model"${CRLF}${CRLF}` +
+    `saarika:v2` +
+    `${CRLF}--${boundary}${CRLF}` +
+    `Content-Disposition: form-data; name="language_code"${CRLF}${CRLF}` +
+    `hi-IN` +
+    `${CRLF}--${boundary}${CRLF}` +
+    `Content-Disposition: form-data; name="with_timestamps"${CRLF}${CRLF}` +
+    `false` +
+    `${CRLF}--${boundary}--${CRLF}`;
+
+  const body = Buffer.concat([Buffer.from(header, 'utf8'), buf, Buffer.from(tail, 'utf8')]);
+
+  const res = await fetch('https://api.sarvam.ai/speech-to-text', {
+    method: 'POST',
+    headers: {
+      'api-subscription-key': key,
+      'Content-Type': `multipart/form-data; boundary=${boundary}`,
+    },
+    body,
+    signal: AbortSignal.timeout(25_000),
+  });
+
+  if (!res.ok) throw new Error(`Sarvam ${res.status}: ${await res.text().catch(() => '')}`);
+  const data = await res.json();
+  const text = data.transcript || data.text || '';
+  if (!text) throw new Error('Sarvam returned empty transcript');
+  return text.trim();
 }
 
 // ── Groq Whisper API ──────────────────────────────────────────────────────────
@@ -165,6 +210,7 @@ module.exports = async function handler(req, res) {
   if (!buf.length) return res.status(400).json({ error: 'Empty file' });
 
   const contentType = req.headers['content-type'] || 'audio/ogg';
+  const sarvamKey = process.env.SARVAM_KEY;
   const groqToken = process.env.GROQ_TOKEN;
   const hfToken   = process.env.HF_TOKEN;
   const aaiKey    = process.env.ASSEMBLYAI_KEY;
@@ -172,7 +218,17 @@ module.exports = async function handler(req, res) {
   // Shared deadline: 55 s from now, leaving 5 s margin before Vercel's 60 s cut-off
   const deadline = Date.now() + TOTAL_BUDGET;
 
-  // 1. Try Groq first — fastest, best code-switching support
+  // 1. Try Sarvam — best for Hindi/English code-switching (saarika:v2)
+  if (sarvamKey) {
+    try {
+      const text = await sarvamTranscribe(buf, contentType, sarvamKey);
+      return res.json({ text, provider: 'sarvam' });
+    } catch (err) {
+      console.error('[Sarvam] failed, trying Groq:', err.message);
+    }
+  }
+
+  // 2. Try Groq
   if (groqToken) {
     try {
       const text = await groqTranscribe(buf, contentType, groqToken);
@@ -182,7 +238,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // 2. Try HF — give it at most 25 s so AAI always has a fair slice
+  // 3. Try HF — give it at most 25 s so AAI always has a fair slice
   if (hfToken) {
     const hfDeadline = Math.min(deadline, Date.now() + 25_000);
     try {
@@ -193,7 +249,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // 3. Fall back to AssemblyAI
+  // 4. Fall back to AssemblyAI
   if (aaiKey) {
     try {
       const text = await aaiTranscribe(buf, aaiKey, deadline);
@@ -204,7 +260,7 @@ module.exports = async function handler(req, res) {
   }
 
   return res.status(500).json({
-    error: 'No API keys configured. Add GROQ_TOKEN, HF_TOKEN, or ASSEMBLYAI_KEY in Vercel → Settings → Environment Variables.',
+    error: 'No API keys configured. Add SARVAM_KEY, GROQ_TOKEN, HF_TOKEN, or ASSEMBLYAI_KEY in Vercel → Settings → Environment Variables.',
   });
 };
 
