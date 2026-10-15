@@ -36,12 +36,12 @@ async function hfTranscribe(buf, contentType, token, deadline) {
   const remaining = () => Math.max(0, deadline - Date.now());
 
   const attempt = () => fetch(
-    'https://api-inference.huggingface.co/models/openai/whisper-large-v3',
+    'https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo',
     {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': contentType },
       body: buf,
-      signal: AbortSignal.timeout(Math.min(remaining(), 15_000)),
+      signal: AbortSignal.timeout(Math.min(remaining(), 20_000)),
     }
   );
 
