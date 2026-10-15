@@ -49,7 +49,7 @@ async function groqTranscribe(buf, contentType, token) {
   const middle =
     `${CRLF}--${boundary}${CRLF}` +
     `Content-Disposition: form-data; name="model"${CRLF}${CRLF}` +
-    `whisper-large-v3-turbo` +
+    `whisper-large-v3` +
     `${CRLF}--${boundary}${CRLF}` +
     `Content-Disposition: form-data; name="response_format"${CRLF}${CRLF}` +
     `json` +
@@ -86,7 +86,7 @@ async function hfTranscribe(buf, contentType, token, deadline) {
   const remaining = () => Math.max(0, deadline - Date.now());
 
   const attempt = () => fetch(
-    'https://api-inference.huggingface.co/models/openai/whisper-large-v3-turbo',
+    'https://api-inference.huggingface.co/models/openai/whisper-large-v3',
     {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': contentType },
