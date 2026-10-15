@@ -1,20 +1,20 @@
-/**
+﻿/**
  * POST /api/transcribe
  * Body  : raw audio binary
  * Header: Content-Type: audio/ogg (or audio/mpeg etc.)
  *
  * Strategy:
- *  1. Hugging Face Inference API (Whisper large-v3)
- *  2. AssemblyAI fallback
+ *  1. Try Hugging Face Inference API (free, fast for short clips)
+ *  2. Fall back to AssemblyAI (free 100 h/month, handles longer files)
  *
- * Env vars:
+ * Env vars (set in Vercel dashboard → Settings → Environment Variables):
  *  HF_TOKEN       — Hugging Face token (free at huggingface.co/settings/tokens)
  *  ASSEMBLYAI_KEY — AssemblyAI API key (free at assemblyai.com)
  */
 
-const MAX_BYTES    = 25 * 1024 * 1024;
-const TOTAL_BUDGET = 55_000; // ms — stay inside Vercel's 60 s limit
+const MAX_BYTES = 25 * 1024 * 1024; // 25 MB
 
+// Read raw request body as a Buffer
 function readBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
@@ -29,27 +29,25 @@ function readBody(req) {
   });
 }
 
-// ── Hugging Face ──────────────────────────────────────────────────────────────
-async function hfTranscribe(buf, contentType, token, deadline) {
-  const remaining = () => Math.max(0, deadline - Date.now());
-
-  const attempt = () => fetch(
+// ── Hugging Face Inference API ────────────────────────────────────────────────
+async function hfTranscribe(buf, contentType, token) {
+  const attempt = async () => fetch(
     'https://api-inference.huggingface.co/models/openai/whisper-large-v3',
     {
-      method:  'POST',
+      method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': contentType },
-      body:    buf,
-      signal:  AbortSignal.timeout(Math.min(remaining(), 20_000)),
+      body: buf,
+      signal: AbortSignal.timeout(30_000),
     }
   );
 
   let res = await attempt();
 
+  // Model cold-start: wait the estimated time then retry once
   if (res.status === 503) {
     const meta = await res.json().catch(() => ({}));
-    const wait = Math.min((meta.estimated_time || 15) * 1000, 10_000, remaining() - 5_000);
-    if (wait > 0) await new Promise(r => setTimeout(r, wait));
-    if (remaining() < 3_000) throw new Error('HF cold-start exhausted time budget');
+    const wait = Math.min((meta.estimated_time || 20) * 1000, 25_000);
+    await new Promise(r => setTimeout(r, wait));
     res = await attempt();
   }
 
@@ -60,31 +58,31 @@ async function hfTranscribe(buf, contentType, token, deadline) {
 }
 
 // ── AssemblyAI ────────────────────────────────────────────────────────────────
-async function aaiTranscribe(buf, key, deadline) {
+async function aaiTranscribe(buf, key) {
+  // 1. Upload audio
   const up = await fetch('https://api.assemblyai.com/v2/upload', {
-    method:  'POST',
+    method: 'POST',
     headers: { authorization: key, 'content-type': 'application/octet-stream' },
-    body:    buf,
-    signal:  AbortSignal.timeout(15_000),
+    body: buf,
   });
   if (!up.ok) throw new Error(`AAI upload failed: ${up.status}`);
   const { upload_url } = await up.json();
 
+  // 2. Request transcript
   const tx = await fetch('https://api.assemblyai.com/v2/transcript', {
-    method:  'POST',
+    method: 'POST',
     headers: { authorization: key, 'content-type': 'application/json' },
-    body:    JSON.stringify({ audio_url: upload_url }),
-    signal:  AbortSignal.timeout(10_000),
+    body: JSON.stringify({ audio_url: upload_url, language_code: 'en_us' }),
   });
   if (!tx.ok) throw new Error(`AAI transcript request failed: ${tx.status}`);
   const { id } = await tx.json();
 
+  // 3. Poll until done (up to 55 s — stays within 60 s Vercel limit)
+  const deadline = Date.now() + 55_000;
   while (Date.now() < deadline) {
-    await new Promise(r => setTimeout(r, 2_000));
-    if (Date.now() >= deadline) break;
+    await new Promise(r => setTimeout(r, 2_500));
     const poll = await fetch(`https://api.assemblyai.com/v2/transcript/${id}`, {
       headers: { authorization: key },
-      signal:  AbortSignal.timeout(8_000),
     });
     const result = await poll.json();
     if (result.status === 'completed') return result.text.trim();
@@ -98,31 +96,32 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   let buf;
-  try { buf = await readBody(req); }
-  catch (err) { return res.status(413).json({ error: err.message }); }
+  try {
+    buf = await readBody(req);
+  } catch (err) {
+    return res.status(413).json({ error: err.message });
+  }
 
   if (!buf.length) return res.status(400).json({ error: 'Empty file' });
 
   const contentType = req.headers['content-type'] || 'audio/ogg';
-  const hfToken = process.env.HF_TOKEN;
-  const aaiKey  = process.env.ASSEMBLYAI_KEY;
-  const deadline = Date.now() + TOTAL_BUDGET;
+  const hfToken  = process.env.HF_TOKEN;
+  const aaiKey   = process.env.ASSEMBLYAI_KEY;
 
-  // 1. HF — capped at 25 s so AAI always has room
+  // Try HF first
   if (hfToken) {
-    const hfDeadline = Math.min(deadline, Date.now() + 25_000);
     try {
-      const text = await hfTranscribe(buf, contentType, hfToken, hfDeadline);
+      const text = await hfTranscribe(buf, contentType, hfToken);
       return res.json({ text, provider: 'huggingface' });
     } catch (err) {
       console.error('[HF] failed, falling back to AssemblyAI:', err.message);
     }
   }
 
-  // 2. AssemblyAI
+  // Fall back to AssemblyAI
   if (aaiKey) {
     try {
-      const text = await aaiTranscribe(buf, aaiKey, deadline);
+      const text = await aaiTranscribe(buf, aaiKey);
       return res.json({ text, provider: 'assemblyai' });
     } catch (err) {
       return res.status(500).json({ error: err.message });
@@ -135,5 +134,8 @@ module.exports = async function handler(req, res) {
 };
 
 module.exports.config = {
-  api: { bodyParser: false, responseLimit: '10mb' },
+  api: {
+    bodyParser: false,   // we read the raw stream above
+    responseLimit: '10mb',
+  },
 };
